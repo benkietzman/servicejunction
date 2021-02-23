@@ -1,0 +1,14 @@
+[Unit]
+Description=Service Junction daemon
+
+[Service]
+Type=simple
+Environment="LD_LIBRARY_PATH=/usr/local/lib"
+ExecStartPre=/bin/cp /usr/local/servicejunction/junction_preload /usr/local/servicejunction/junction
+ExecStart=/usr/local/servicejunction/junction
+Restart=always
+LimitNOFILE=65536
+User=junction
+
+[Install]
+WantedBy=multi-user.target
