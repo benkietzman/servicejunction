@@ -19,7 +19,7 @@ bin/junction: ../common/libcommon.a obj/junction.o
 
 obj/junction.o: junction.cpp
 	-if [ ! -d obj ]; then mkdir obj; fi;
-	g++ -fPIC -g -std=c++14 -Wall -c junction.cpp -o obj/junction.o -I/data/extras/include -I../common
+	g++ -fPIC -g -Wall -c junction.cpp -o obj/junction.o -I/data/extras/include -I../common
 
 install: bin/junction
 	-if [ ! -d /usr/local/servicejunction ]; then mkdir /usr/local/servicejunction; fi;

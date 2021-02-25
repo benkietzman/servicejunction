@@ -74,61 +74,61 @@ bin:
 	cd ../../common; ./configure; make;
 
 obj/functions.o: include/functions.cpp obj
-	g++ -g -std=c++14 -Wall -c include/functions.cpp -o obj/functions.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
+	g++ -g -Wall -c include/functions.cpp -o obj/functions.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
 
 obj/acorn.o: acorn.cpp obj
-	g++ -g -std=c++14 -Wall -c acorn.cpp -o obj/acorn.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
+	g++ -g -Wall -c acorn.cpp -o obj/acorn.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
 
 obj/acronym.o: acronym.cpp obj
-	g++ -g -std=c++14 -Wall -c acronym.cpp -o obj/acronym.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
+	g++ -g -Wall -c acronym.cpp -o obj/acronym.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
 
 obj/addrInfo.o: addrInfo.cpp obj
-	g++ -g -std=c++14 -Wall -c addrInfo.cpp -o obj/addrInfo.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
+	g++ -g -Wall -c addrInfo.cpp -o obj/addrInfo.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
 
 obj/curl.o: curl.cpp obj
-	g++ -g -std=c++14 -Wall -c curl.cpp -o obj/curl.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
+	g++ -g -Wall -c curl.cpp -o obj/curl.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
 
 obj/format.o: format.cpp obj
-	g++ -g -std=c++14 -Wall -c format.cpp -o obj/format.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
+	g++ -g -Wall -c format.cpp -o obj/format.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
 
 obj/google.o: google.cpp obj
-	g++ -g -std=c++14 -Wall -c google.cpp -o obj/google.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
+	g++ -g -Wall -c google.cpp -o obj/google.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
 
 obj/jira.o: jira.cpp obj
-	g++ -g -std=c++14 -Wall -c jira.cpp -o obj/jira.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
+	g++ -g -Wall -c jira.cpp -o obj/jira.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
 
 obj/jwt.o: jwt.cpp obj
-	g++ -g -std=c++14 -Wall -c jwt.cpp -o obj/jwt.o -I/usr/local/include -I/usr/local/ssl/include -I/data/extras/include -I../../common;
+	g++ -g -Wall -c jwt.cpp -o obj/jwt.o -I/usr/local/include -I/usr/local/ssl/include -I/data/extras/include -I../../common;
 
 obj/logger.o: logger.cpp obj
-	g++ -g -std=c++14 -Wall -c logger.cpp -o obj/logger.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
+	g++ -g -Wall -c logger.cpp -o obj/logger.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
 
 obj/mssql.o: mssql.cpp obj
-	g++ -g -std=c++14 -Wall -c mssql.cpp -o obj/mssql.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
+	g++ -g -Wall -c mssql.cpp -o obj/mssql.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
 
 obj/mysql.o: mysql.cpp obj
-	g++ -g -std=c++14 -Wall -c mysql.cpp -o obj/mysql.o -I/usr/local/mysql/include -I/usr/local/ssl/include -I/data/extras/include -I../../common;
+	g++ -g -Wall -c mysql.cpp -o obj/mysql.o -I/usr/local/mysql/include -I/usr/local/ssl/include -I/data/extras/include -I../../common;
 
 obj/password.o: password.cpp obj
-	g++ -g -std=c++14 -Wall -c password.cpp -o obj/password.o -I/usr/local/mysql/include -I/usr/local/ssl/include -I/data/extras/include -I../../common;
+	g++ -g -Wall -c password.cpp -o obj/password.o -I/usr/local/mysql/include -I/usr/local/ssl/include -I/data/extras/include -I../../common;
 
 obj/pdf.o: pdf.cpp obj
-	g++ -g -std=c++14 -Wall -c pdf.cpp -o obj/pdf.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
+	g++ -g -Wall -c pdf.cpp -o obj/pdf.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
 
 obj/ping.o: ping.cpp obj
-	g++ -g -std=c++14 -Wall -c ping.cpp -o obj/ping.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
+	g++ -g -Wall -c ping.cpp -o obj/ping.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
 
 obj/portConcentrator.o: portConcentrator.cpp obj
-	g++ -g -std=c++14 -Wall -c portConcentrator.cpp -o obj/portConcentrator.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
+	g++ -g -Wall -c portConcentrator.cpp -o obj/portConcentrator.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
 
 obj/samba.o: samba.cpp obj
-	g++ -g -std=c++14 -Wall -c samba.cpp -o obj/samba.o -I/usr/include/samba-4.0 -I/usr/local/ssl/include -I/data/extras/include -I../../common;
+	g++ -g -Wall -c samba.cpp -o obj/samba.o -I/usr/include/samba-4.0 -I/usr/local/ssl/include -I/data/extras/include -I../../common;
 
 obj/transmission.o: transmission.cpp obj
-	g++ -g -std=c++14 -Wall -c transmission.cpp -o obj/transmission.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
+	g++ -g -Wall -c transmission.cpp -o obj/transmission.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
 
 obj/zoneMinder.o: zoneMinder.cpp obj
-	g++ -g -std=c++14 -Wall -c zoneMinder.cpp -o obj/zoneMinder.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
+	g++ -g -Wall -c zoneMinder.cpp -o obj/zoneMinder.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
 
 obj:
 	if [ ! -d obj ]; then mkdir obj; fi;
