@@ -14,10 +14,16 @@ bin/junction: ../common/libcommon.a obj/junction.o
 	-if [ ! -d bin ]; then mkdir bin; fi;
 	g++ -o bin/junction obj/junction.o -L/data/extras/lib -L../common -lcommon -lb64 -lcrypto -lexpat -lmjson -lnsl -lpthread -lrt -lssl -ltar -lz
 
-../common/libcommon.a:
+../common/libcommon.a: ../common/Makefile
 	cd ../common; ./configure; make;
 
-obj/junction.o: junction.cpp
+../common/Makefile: ../common/configure
+	cd ../common; ./configure;
+
+../common/configure:
+	cd ../; git clone https://github.com/benkietzman/common.git
+
+obj/junction.o: junction.cpp ../common/Makefile
 	-if [ ! -d obj ]; then mkdir obj; fi;
 	g++ -fPIC -g -Wall -c junction.cpp -o obj/junction.o -I/data/extras/include -I../common
 
