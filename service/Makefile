@@ -70,64 +70,70 @@ bin/zoneMinder: ../../common/libcommon.a obj/functions.o obj/zoneMinder.o bin
 bin:
 	if [ ! -d bin ]; then mkdir bin; fi;
 
-../../common/libcommon.a:
-	cd ../../common; ./configure; make;
+../../common/libcommon.a: ../../common/Makefile
+	cd ../../common; make;
 
-obj/functions.o: include/functions.cpp obj
+../../common/Makefile: ../../common/configure
+	cd ../../common; ./configure;
+
+../../common/configure:
+	cd ../../; git clone https://github.com/benkietzman/common.git
+
+obj/functions.o: include/functions.cpp obj ../../common/Makefile
 	g++ -g -Wall -c include/functions.cpp -o obj/functions.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
 
-obj/acorn.o: acorn.cpp obj
+obj/acorn.o: acorn.cpp obj ../../common/Makefile
 	g++ -g -Wall -c acorn.cpp -o obj/acorn.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
 
-obj/acronym.o: acronym.cpp obj
+obj/acronym.o: acronym.cpp obj ../../common/Makefile
 	g++ -g -Wall -c acronym.cpp -o obj/acronym.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
 
-obj/addrInfo.o: addrInfo.cpp obj
+obj/addrInfo.o: addrInfo.cpp obj ../../common/Makefile
 	g++ -g -Wall -c addrInfo.cpp -o obj/addrInfo.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
 
-obj/curl.o: curl.cpp obj
+obj/curl.o: curl.cpp obj ../../common/Makefile
 	g++ -g -Wall -c curl.cpp -o obj/curl.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
 
-obj/format.o: format.cpp obj
+obj/format.o: format.cpp obj ../../common/Makefile
 	g++ -g -Wall -c format.cpp -o obj/format.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
 
-obj/google.o: google.cpp obj
+obj/google.o: google.cpp obj ../../common/Makefile
 	g++ -g -Wall -c google.cpp -o obj/google.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
 
-obj/jira.o: jira.cpp obj
+obj/jira.o: jira.cpp obj ../../common/Makefile
 	g++ -g -Wall -c jira.cpp -o obj/jira.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
 
-obj/jwt.o: jwt.cpp obj
+obj/jwt.o: jwt.cpp obj ../../common/Makefile
 	g++ -g -Wall -c jwt.cpp -o obj/jwt.o -I/usr/local/include -I/usr/local/ssl/include -I/data/extras/include -I../../common;
 
-obj/logger.o: logger.cpp obj
+obj/logger.o: logger.cpp obj ../../common/Makefile
 	g++ -g -Wall -c logger.cpp -o obj/logger.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
 
-obj/mssql.o: mssql.cpp obj
+obj/mssql.o: mssql.cpp obj ../../common/Makefile
 	g++ -g -Wall -c mssql.cpp -o obj/mssql.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
 
-obj/mysql.o: mysql.cpp obj
+obj/mysql.o: mysql.cpp obj ../../common/Makefile
 	g++ -g -Wall -c mysql.cpp -o obj/mysql.o -I/usr/local/mysql/include -I/usr/local/ssl/include -I/data/extras/include -I../../common;
 
-obj/password.o: password.cpp obj
+obj/password.o: password.cpp obj ../../common/Makefile
 	g++ -g -Wall -c password.cpp -o obj/password.o -I/usr/local/mysql/include -I/usr/local/ssl/include -I/data/extras/include -I../../common;
 
-obj/pdf.o: pdf.cpp obj
+obj/pdf.o: pdf.cpp obj ../../common/Makefile
 	g++ -g -Wall -c pdf.cpp -o obj/pdf.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
 
-obj/ping.o: ping.cpp obj
+obj/ping.o: ping.cpp obj ../../common/Makefile
 	g++ -g -Wall -c ping.cpp -o obj/ping.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
 
-obj/portConcentrator.o: portConcentrator.cpp obj
+obj/portConcentrator.o: portConcentrator.cpp obj ../../common/Makefile
 	g++ -g -Wall -c portConcentrator.cpp -o obj/portConcentrator.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
 
-obj/samba.o: samba.cpp obj
+obj/samba.o: samba.cpp obj ../../common/Makefile
 	g++ -g -Wall -c samba.cpp -o obj/samba.o -I/usr/include/samba-4.0 -I/usr/local/ssl/include -I/data/extras/include -I../../common;
 
-obj/transmission.o: transmission.cpp obj
+obj/transmission.o: transmission.cpp obj ../../common/Makefile
 	g++ -g -Wall -c transmission.cpp -o obj/transmission.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
 
-obj/zoneMinder.o: zoneMinder.cpp obj
+obj/zoneMinder.o: zoneMinder.cpp obj ../../common/Makefile
 	g++ -g -Wall -c zoneMinder.cpp -o obj/zoneMinder.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
 
 obj:

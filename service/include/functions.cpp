@@ -74,7 +74,10 @@ bool fetchPage(string &strUrl, const string strType, map<string, string> auth, c
   curl_easy_setopt(ch, CURLOPT_ERRORBUFFER, szError);
   if (!strUserAgent.empty())
   {
-    curl_easy_setopt(ch, CURLOPT_USERAGENT, strUserAgent.c_str());
+    if (strUserAgent != "none")
+    {
+      curl_easy_setopt(ch, CURLOPT_USERAGENT, strUserAgent.c_str());
+    }
   }
   else if (bMobile)
   {
