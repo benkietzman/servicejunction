@@ -457,10 +457,6 @@ int main(int argc, char *argv[])
                         sockaddr_in6 *s = (sockaddr_in6 *)&addr;
                         inet_ntop(AF_INET6, &s->sin6_addr, szIP, sizeof(szIP));
                       }
-                      if (gpSyslog != NULL)
-                      {
-                        gpSyslog->connectionStarted("Accepted an incoming request.", fdData);
-                      }
                       if (bSecure)
                       {
                         ssl = SSL_new(ctx);
@@ -635,7 +631,7 @@ int main(int argc, char *argv[])
                                                     close(CHILD_WRITE);
                                                     if (gpSyslog != NULL)
                                                     {
-                                                      gpSyslog->commandLaunched(strCommand);
+                                                      gpSyslog->connectionStartedCommandLaunched(strCommand, "Accepted an incoming request.", fdData);
                                                     }
                                                     execve(args[0], args, environ);
                                                     _exit(1);
@@ -799,10 +795,6 @@ int main(int argc, char *argv[])
                                   stringstream ssMessage;
                                   close((*i)->readpipe);
                                   close((*i)->writepipe);
-                                  if (gpSyslog != NULL)
-                                  {
-                                    gpSyslog->commandEnded((*i)->strCommand);
-                                  }
                                   strBuffer[1].append((*i)->strBuffer[0] + "end\n");
                                   (*i)->strBuffer[0].clear();
                                   ssMessage << "[Service:" << (*i)->ptRequest->m["Service"]->v << ",Port:" << (string)((bConcentrator)?"concentrator":((bStandard)?"standard":"secure")) << ",IP:" << szIP << ",Duration:" << ((*i)->CEndTime - (*i)->CStartTime) << "]  ";
@@ -855,10 +847,6 @@ int main(int argc, char *argv[])
                       if (bSecure)
                       {
                         SSL_free(ssl);
-                      }
-                      if (gpSyslog != NULL)
-                      {
-                        gpSyslog->connectionStopped("Closed request.", fdData);
                       }
                       close(fdData);
                       _exit(1);
