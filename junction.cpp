@@ -255,9 +255,6 @@ int main(int argc, char *argv[])
         gpCentral->utility()->daemonize();
       }
       setlocale(LC_ALL, "");
-      SSL_library_init();
-      OpenSSL_add_all_algorithms();
-      SSL_load_error_strings();
       ofstream outPid((gstrData + PID).c_str());
       if (outPid.good())
       {
@@ -269,7 +266,6 @@ int main(int argc, char *argv[])
       if ((nConcentrator = fork()) >= 0)
       {
         bool bChild = false, bConcentrator = false, bSecure = false, bStandard = false;
-        SSL_METHOD *method = NULL;
         SSL_CTX *ctx = NULL;
         if (nConcentrator > 0)
         {
@@ -286,7 +282,7 @@ int main(int argc, char *argv[])
           }
           else
           {
-            gpCentral->alert((string)"fork() error [concentrator->secure]: " + strerror(errno), strError);
+            gpCentral->alert((string)"fork() error [concentrator->secure]: " + strerror(errno));
           }
         }
         else
@@ -296,21 +292,41 @@ int main(int argc, char *argv[])
         }
         if (bSecure)
         {
-          method = (SSL_METHOD *)TLS_server_method();
-        }
-        if (bStandard || ((ctx = SSL_CTX_new(method)) != NULL && SSL_CTX_use_certificate_file(ctx, (gstrData + CERTIFICATE).c_str(), SSL_FILETYPE_PEM) > 0 && SSL_CTX_use_PrivateKey_file(ctx, (gstrData + PRIVATE_KEY).c_str(), SSL_FILETYPE_PEM) > 0))
-        {
-          if (bStandard || SSL_CTX_check_private_key(ctx))
+          stringstream ssMessage;
+          if ((ctx = gpCentral->utility()->sslInitServer(strError)) != NULL)
           {
+            ssMessage.str("");
+            ssMessage << "CentralAddons::utility()->sslInitServer():  SSL initialization was successful.";
+            gpCentral->log(ssMessage.str());
+            if (gpCentral->utility()->sslLoadCertKey(ctx, (gstrData + CERTIFICATE), (gstrData + PRIVATE_KEY), strError))
+            {
+              ssMessage.str("");
+              ssMessage << "CentralAddons::utility()->sslLoadCertKey():  SSL certification/key loading was successful.";
+              gpCentral->log(ssMessage.str());
+            }
+            else
+            {
+              gbShutdown = true;
+              ssMessage.str("");
+              ssMessage << "CentralAddons::utility()->sslLoadCertKey() error:  " << strError;
+              gpCentral->notify(ssMessage.str());
+            }
+          }
+          else
+          {
+            gbShutdown = true;
+            ssMessage.str("");
+            ssMessage << "CentralAddons::utility()->sslInitServer() error:  " << strError;
+            gpCentral->notify(ssMessage.str());
+          }
+        }
+        if (!gbShutdown)
+        {
             struct addrinfo hints;
             struct addrinfo *result;
             int fdSocket = -1, nReturn;
             time_t ulModifyTime = 0;
             map<string, map<string, string> > service;
-            if (bSecure)
-            {
-              SSL_CTX_set_mode(ctx, SSL_MODE_AUTO_RETRY);
-            }
             memset(&hints, 0, sizeof(struct addrinfo));
             hints.ai_family = AF_INET6;
             hints.ai_socktype = SOCK_STREAM;
@@ -338,14 +354,14 @@ int main(int argc, char *argv[])
               freeaddrinfo(result);
               if (bBound)
               {
-                gpCentral->log((string)"Bound to the " + (string)((bConcentrator)?"concentrator":((bStandard)?"standard":"secure")) + (string)" socket.", strError);
+                gpCentral->log((string)"Bound to the " + (string)((bConcentrator)?"concentrator":((bStandard)?"standard":"secure")) + (string)" socket.");
                 if (listen(fdSocket, SOMAXCONN) == 0)
                 {
                   int fdData;
                   string strSystem;
                   socklen_t clilen;
                   sockaddr_in cli_addr;
-                  gpCentral->log((string)"Listening to the " + (string)((bConcentrator)?"concentrator":((bStandard)?"standard":"secure")) + (string)" socket.", strError);
+                  gpCentral->log((string)"Listening to the " + (string)((bConcentrator)?"concentrator":((bStandard)?"standard":"secure")) + (string)" socket.");
                   clilen = sizeof(cli_addr);
                   while (!gbShutdown && (fdData = accept(fdSocket, (struct sockaddr *)&cli_addr, &clilen)) >= 0)
                   {
@@ -385,7 +401,7 @@ int main(int argc, char *argv[])
                         if (ulModifyTime != tStat.st_mtime)
                         {
                           ifstream inFile;
-                          gpCentral->log((string)((ulModifyTime == 0)?"L":"Rel") + (string)"oaded the configuration file.", strError);
+                          gpCentral->log((string)((ulModifyTime == 0)?"L":"Rel") + (string)"oaded the configuration file.");
                           inFile.open((gstrData + SERVICE_CONFIG).c_str());
                           if (inFile.good())
                           {
@@ -412,31 +428,31 @@ int main(int argc, char *argv[])
                                   }
                                   else
                                   {
-                                    gpCentral->notify("", (string)"Invalid service configuration.  Please provide the Command.  " + strConf, strError);
+                                    gpCentral->notify((string)"Invalid service configuration.  Please provide the Command.  " + strConf);
                                   }
                                 }
                                 else
                                 {
-                                  gpCentral->notify("", (string)"Invalid service configuration.  Please provide the Service.  " + strConf, strError);
+                                  gpCentral->notify((string)"Invalid service configuration.  Please provide the Service.  " + strConf);
                                 }
                               }
                               else
                               {
-                                gpCentral->notify("", (string)"Invalid JSON formatting in service configuration.  " + strConf, strError);
+                                gpCentral->notify((string)"Invalid JSON formatting in service configuration.  " + strConf);
                               }
                               serviceMap.clear();
                             }
                           }
                           else
                           {
-                            gpCentral->alert((string)"Unable to open service configuation for reading.  " + gstrData + (string)SERVICE_CONFIG, strError);
+                            gpCentral->alert((string)"Unable to open service configuation for reading.  " + gstrData + (string)SERVICE_CONFIG);
                           }
                           inFile.close();
                         }
                       }
                       else
                       {
-                        gpCentral->alert((string)"Unable to locate service configuration.  " + gstrData + (string)SERVICE_CONFIG, strError);
+                        gpCentral->alert((string)"Unable to locate service configuration.  " + gstrData + (string)SERVICE_CONFIG);
                       }
                     }
                     // }}}
@@ -459,6 +475,7 @@ int main(int argc, char *argv[])
                       }
                       if (bSecure)
                       {
+                        ERR_clear_error();
                         ssl = SSL_new(ctx);
                         SSL_set_fd(ssl, fdData);
                       }
@@ -807,7 +824,7 @@ int main(int argc, char *argv[])
                                     (*i)->ptRequest->insert("Password", "******");
                                   }
                                   ssMessage << (*i)->ptRequest;
-                                  gpCentral->log(ssMessage.str(), strError);
+                                  gpCentral->log(ssMessage.str());
                                   delete (*i)->ptRequest;
                                   delete *i;
                                   removeList.push_back(i);
@@ -824,7 +841,7 @@ int main(int argc, char *argv[])
                           else if (nReturn < 0)
                           {
                             bExit = true;
-                            gpCentral->log((string)"poll() error: " + strerror(errno), strError);
+                            gpCentral->log((string)"poll() error: " + strerror(errno));
                           }
                           delete[] fds;
                         }
@@ -836,16 +853,17 @@ int main(int argc, char *argv[])
                           (*i)->strBuffer[1].clear();
                           delete (*i)->ptRequest;
                           delete *i;
-                          gpCentral->log("Removed unaccounted for request from queue.", strError);
+                          gpCentral->log("Removed unaccounted for request from queue.");
                         }
                         queue.clear();
                       }
                       else
                       {
-                        gpCentral->log("Could not accept SSL connection.", strError);
+                        gpCentral->log(gpCentral->utility()->sslstrerror());
                       }
                       if (bSecure)
                       {
+                        SSL_shutdown(ssl);
                         SSL_free(ssl);
                       }
                       close(fdData);
@@ -860,33 +878,28 @@ int main(int argc, char *argv[])
                   {
                     gbShutdown = true;
                   }
-                  gpCentral->alert((string)"Lost connection to the " + (string)((bConcentrator)?"concentrator":((bStandard)?"standard":"secure")) + (string)" socket!  Exiting...", strError);
+                  gpCentral->alert((string)"Lost connection to the " + (string)((bConcentrator)?"concentrator":((bStandard)?"standard":"secure")) + (string)" socket!  Exiting...");
                 }
                 else
                 {
-                  gpCentral->alert((string)"Could not listen to the " + (string)((bConcentrator)?"concentrator":((bStandard)?"standard":"secure")) + (string)" socket!  Exiting...", strError);
+                  gpCentral->alert((string)"Could not listen to the " + (string)((bConcentrator)?"concentrator":((bStandard)?"standard":"secure")) + (string)" socket!  Exiting...");
                 }
                 close(fdSocket);
-                gpCentral->log((string)"Closed the " + (string)((bConcentrator)?"concentrator":((bStandard)?"standard":"secure")) + (string)" socket.", strError);
+                gpCentral->log((string)"Closed the " + (string)((bConcentrator)?"concentrator":((bStandard)?"standard":"secure")) + (string)" socket.");
               }
               else
               {
-                gpCentral->alert((string)"Could not bind to the " + (string)((bConcentrator)?"concentrator":((bStandard)?"standard":"secure")) + (string)" socket!  Exiting...", strError);
+                gpCentral->alert((string)"Could not bind to the " + (string)((bConcentrator)?"concentrator":((bStandard)?"standard":"secure")) + (string)" socket!  Exiting...");
               }
             }
             else
             {
-              gpCentral->alert((string)"Could not get address information for the " + (string)((bConcentrator)?"concentrator":((bStandard)?"standard":"secure")) + (string)" socket!  (" + (string)gai_strerror(nReturn) + (string)")  Exiting...", strError);
+              gpCentral->alert((string)"Could not get address information for the " + (string)((bConcentrator)?"concentrator":((bStandard)?"standard":"secure")) + (string)" socket!  (" + (string)gai_strerror(nReturn) + (string)")  Exiting...");
             }
-          }
-          else
-          {
-            gpCentral->alert("Private key does not match the public certificate", strError);
-          }
         }
         else
         {
-          gpCentral->alert("Error setting up SSL context keys.", strError);
+          gpCentral->alert("Error setting up SSL context keys.");
         }
         if (bSecure)
         {
@@ -899,7 +912,7 @@ int main(int argc, char *argv[])
       }
       else
       {
-        gpCentral->alert((string)"fork() error [concentrator->standard]: " + strerror(errno), strError);
+        gpCentral->alert((string)"fork() error [concentrator->standard]: " + strerror(errno));
       }
       // {{{ check pid file
       if (gpCentral->file()->fileExist((gstrData + PID).c_str()))
@@ -936,7 +949,7 @@ void sighandle(const int nSignal)
   if (nSignal != SIGINT && nSignal != SIGTERM)
   {
     ssSignal << nSignal;
-    gpCentral->alert((string)"The program's signal handling caught a " + (string)sigstring(strSignal, nSignal) + (string)"(" + ssSignal.str() + (string)")!  Exiting...", strError);
+    gpCentral->alert((string)"The program's signal handling caught a " + (string)sigstring(strSignal, nSignal) + (string)"(" + ssSignal.str() + (string)")!  Exiting...");
   }
   exit(1);
 }
