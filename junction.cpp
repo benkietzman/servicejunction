@@ -482,7 +482,6 @@ int main(int argc, char *argv[])
                       if (bStandard || SSL_accept(ssl) != -1)
                       {
                         bool bExit = false;
-                        char szBuffer[65536];
                         list<string> buffer;
                         list<connection *> queue;
                         pollfd *fds;
