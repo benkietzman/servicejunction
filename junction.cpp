@@ -523,10 +523,9 @@ int main(int argc, char *argv[])
                                 // {{{ read
                                 if (fds[unfdIndex].revents & POLLIN)
                                 {
-                                  if ((bStandard && (nReturn = read(fdData, szBuffer, 65536)) > 0) || (bSecure && (nReturn = SSL_read(ssl, szBuffer, 65536)) > 0))
+                                  if ((bStandard && gpCentral->utility()->fdread(fdData, strBuffer[0], nReturn)) || (bSecure && gpCentral->utility()->sslread(ssl, strBuffer[0], nReturn)))
                                   {
                                     bool bHaveRequest = true;
-                                    strBuffer[0].append(szBuffer, nReturn);
                                     while ((unPosition = strBuffer[0].find("\n")) != string::npos)
                                     {
                                       buffer.push_back(strBuffer[0].substr(0, unPosition));
@@ -742,11 +741,7 @@ int main(int argc, char *argv[])
                                 // {{{ write
                                 if (fds[unfdIndex].revents & POLLOUT)
                                 {
-                                  if ((bStandard && (nReturn = write(fdData, strBuffer[1].c_str(), strBuffer[1].size())) > 0) || (bSecure && (nReturn = SSL_write(ssl, (char *)strBuffer[1].c_str(), strBuffer[1].size())) > 0))
-                                  {
-                                    strBuffer[1].erase(0, nReturn);
-                                  }
-                                  else
+                                  if ((bStandard && !gpCentral->utility()->fdwrite(fdData, strBuffer[1], nReturn)) || (bSecure && !gpCentral->utility()->sslwrite(ssl, strBuffer[1], nReturn)))
                                   {
                                     bExit = true;
                                   }
