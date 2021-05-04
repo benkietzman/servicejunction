@@ -240,6 +240,7 @@ int main(int argc, char *argv[])
     }
   }
   // }}}
+  gpCentral->utility()->sslInit();
   gpCentral->setApplication(gstrApplication);
   gpCentral->setEmail(gstrEmail);
   gpCentral->setLog(gstrData, "junction_", "daily", true, true);
@@ -927,6 +928,7 @@ int main(int argc, char *argv[])
   {
     delete gpSyslog;
   }
+  gpCentral->utility()->sslDeinit();
   delete gpCentral;
 
   return 0;
