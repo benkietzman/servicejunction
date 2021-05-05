@@ -11,7 +11,7 @@
 #MAKEFLAGS="-j ${C}"
 MAKE_UNAME=`uname -s`
 
-all: bin/acorn bin/acronym bin/addrInfo bin/curl bin/format bin/google bin/jira bin/jwt bin/logger bin/mssql bin/mysql bin/password bin/pdf bin/ping bin/portConcentrator bin/samba bin/transmission bin/zoneMinder
+all: bin/acorn bin/acronym bin/addrInfo bin/curl bin/format bin/google bin/jira bin/jwt bin/logger bin/mssql bin/mysql bin/password bin/pdf bin/ping bin/portConcentrator bin/samba bin/transmission bin/warden bin/zoneMinder
 
 bin/acorn: ../../common/libcommon.a obj/functions.o obj/acorn.o bin
 	g++ -o bin/acorn obj/acorn.o obj/functions.o -L/data/extras/lib -L../../common -lcommon -lb64 -lcrypto -lcurl -lexpat -lmjson -lnsl -lpthread -lssl -ltar -lz
@@ -63,6 +63,9 @@ bin/samba: ../../common/libcommon.a obj/functions.o obj/samba.o bin
 
 bin/transmission: ../../common/libcommon.a obj/functions.o obj/transmission.o bin
 	g++ -o bin/transmission obj/transmission.o obj/functions.o -L/data/extras/lib -L../../common -lcommon -lb64 -lcrypto -lcurl -lexpat -lmjson -lnsl -lpthread -lssl -ltar -lz
+
+bin/warden: ../../common/libcommon.a obj/functions.o obj/warden.o bin
+	g++ -o bin/warden obj/warden.o obj/functions.o -L/data/extras/lib -L../../common -lcommon -lb64 -lcrypto -lcurl -lexpat -lmjson -lnsl -lpthread -lssl -ltar -lz
 
 bin/zoneMinder: ../../common/libcommon.a obj/functions.o obj/zoneMinder.o bin
 	g++ -o bin/zoneMinder obj/zoneMinder.o obj/functions.o -L/data/extras/lib -L../../common -lcommon -lb64 -lcrypto -lcurl -lexpat -lmjson -lnsl -lpthread -lssl -ltar -lz
@@ -132,6 +135,9 @@ obj/samba.o: samba.cpp obj ../../common/Makefile
 
 obj/transmission.o: transmission.cpp obj ../../common/Makefile
 	g++ -g -Wall -c transmission.cpp -o obj/transmission.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
+
+obj/warden.o: warden.cpp obj ../../common/Makefile
+	g++ -g -Wall -c warden.cpp -o obj/warden.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
 
 obj/zoneMinder.o: zoneMinder.cpp obj ../../common/Makefile
 	g++ -g -Wall -c zoneMinder.cpp -o obj/zoneMinder.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
