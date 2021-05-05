@@ -294,24 +294,11 @@ int main(int argc, char *argv[])
         if (bSecure)
         {
           stringstream ssMessage;
-          if ((ctx = gpCentral->utility()->sslInitServer(strError)) != NULL)
+          if ((ctx = gpCentral->utility()->sslInitServer((gstrData + CERTIFICATE), (gstrData + PRIVATE_KEY), strError)) != NULL)
           {
             ssMessage.str("");
             ssMessage << "CentralAddons::utility()->sslInitServer():  SSL initialization was successful.";
             gpCentral->log(ssMessage.str());
-            if (gpCentral->utility()->sslLoadCertKey(ctx, (gstrData + CERTIFICATE), (gstrData + PRIVATE_KEY), strError))
-            {
-              ssMessage.str("");
-              ssMessage << "CentralAddons::utility()->sslLoadCertKey():  SSL certification/key loading was successful.";
-              gpCentral->log(ssMessage.str());
-            }
-            else
-            {
-              gbShutdown = true;
-              ssMessage.str("");
-              ssMessage << "CentralAddons::utility()->sslLoadCertKey() error:  " << strError;
-              gpCentral->notify(ssMessage.str());
-            }
           }
           else
           {
@@ -523,7 +510,7 @@ int main(int argc, char *argv[])
                                 // {{{ read
                                 if (fds[unfdIndex].revents & POLLIN)
                                 {
-                                  if ((bStandard && gpCentral->utility()->fdread(fdData, strBuffer[0], nReturn)) || (bSecure && gpCentral->utility()->sslread(ssl, strBuffer[0], nReturn)))
+                                  if ((bStandard && gpCentral->utility()->fdRead(fdData, strBuffer[0], nReturn)) || (bSecure && gpCentral->utility()->sslRead(ssl, strBuffer[0], nReturn)))
                                   {
                                     bool bHaveRequest = true;
                                     while ((unPosition = strBuffer[0].find("\n")) != string::npos)
@@ -741,7 +728,7 @@ int main(int argc, char *argv[])
                                 // {{{ write
                                 if (fds[unfdIndex].revents & POLLOUT)
                                 {
-                                  if ((bStandard && !gpCentral->utility()->fdwrite(fdData, strBuffer[1], nReturn)) || (bSecure && !gpCentral->utility()->sslwrite(ssl, strBuffer[1], nReturn)))
+                                  if ((bStandard && !gpCentral->utility()->fdWrite(fdData, strBuffer[1], nReturn)) || (bSecure && !gpCentral->utility()->sslWrite(ssl, strBuffer[1], nReturn)))
                                   {
                                     bExit = true;
                                   }
