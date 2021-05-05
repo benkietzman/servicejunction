@@ -467,7 +467,7 @@ int main(int argc, char *argv[])
                         ssl = SSL_new(ctx);
                         SSL_set_fd(ssl, fdData);
                       }
-                      if (bStandard || SSL_accept(ssl) != -1)
+                      if (bStandard || SSL_accept(ssl) == 1)
                       {
                         bool bExit = false;
                         list<string> buffer;
