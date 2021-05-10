@@ -99,7 +99,7 @@ function fetchPage(&$strUrl, $strCookies, $strPost, &$strHeader, &$strContent, &
     }
     else
     {
-      $strError = 'Failed to execute cURL request.';
+      $strError = curl_error($ch);
     }
   }
   curl_close($ch);
