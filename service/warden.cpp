@@ -72,10 +72,10 @@ int main(int argc, char *argv[])
           if (warden.request(ptReq, ptRes, 120, strError))
           {
             bProcessed = true;
-            if (ptRes->m.find("Data") != ptRes->m.end())
-            {
-              response.push_back(ptRes->m["Data"]->json(strJson));
-            }
+          }
+          if (ptRes->m.find("Data") != ptRes->m.end())
+          {
+            response.push_back(ptRes->m["Data"]->json(strJson));
           }
           delete ptReq;
           delete ptRes;
