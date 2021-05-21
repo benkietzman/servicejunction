@@ -69,213 +69,192 @@ int main(int argc, char *argv[])
     inFile.close();
     if (ptConf != NULL)
     {
-      bool bBridge = false;
-      if (requestArray["Function"] == "verify" && ptConf->m.find("Bridge Password") != ptConf->m.end() && !ptConf->m["Bridge Password"]->v.empty() && ptConf->m.find("Bridge Port") != ptConf->m.end() && !ptConf->m["Bridge Port"]->v.empty() && ptConf->m.find("Bridge Server") != ptConf->m.end() && !ptConf->m["Bridge Server"]->v.empty() && ptConf->m.find("Bridge User") != ptConf->m.end() && !ptConf->m["Bridge User"]->v.empty())
+      if (ptConf->m.find("Database") != ptConf->m.end() && !ptConf->m["Database"]->v.empty() && ptConf->m.find("Database Password") != ptConf->m.end() && !ptConf->m["Database Password"]->v.empty() && ptConf->m.find("Database Server") != ptConf->m.end() && !ptConf->m["Database Server"]->v.empty() && ptConf->m.find("Database User") != ptConf->m.end() && !ptConf->m["Database User"]->v.empty())
       {
-        Bridge bridge(strError);
-        bridge.setCredentials(ptConf->m["Bridge User"]->v, ptConf->m["Bridge Password"]->v);
-        if (strError.empty())
+        MYSQL *conn;
+        string strValue;
+        if ((conn = mysql_init(NULL)) != NULL)
         {
-          bBridge = true;
-          if (bridge.passwordVerify(requestArray["Application"], requestArray["Type"], requestArray["User"], requestArray["Password"], strError))
+          if (mysql_real_connect(conn, ptConf->m["Database Server"]->v.c_str(), ptConf->m["Database User"]->v.c_str(), ptConf->m["Database Password"]->v.c_str(), ptConf->m["Database"]->v.c_str(), 0, NULL, 0) != NULL)
           {
-            bProcessed = true;
-          }
-          else if (strError == "Bridge request failed without returning an error message.")
-          {
-            bBridge = false;
-          }
-        }
-      }
-      if (!bBridge)
-      {
-        if (ptConf->m.find("Database") != ptConf->m.end() && !ptConf->m["Database"]->v.empty() && ptConf->m.find("Database Password") != ptConf->m.end() && !ptConf->m["Database Password"]->v.empty() && ptConf->m.find("Database Server") != ptConf->m.end() && !ptConf->m["Database Server"]->v.empty() && ptConf->m.find("Database User") != ptConf->m.end() && !ptConf->m["Database User"]->v.empty())
-        {
-          MYSQL *conn;
-          string strValue;
-          if ((conn = mysql_init(NULL)) != NULL)
-          {
-            if (mysql_real_connect(conn, ptConf->m["Database Server"]->v.c_str(), ptConf->m["Database User"]->v.c_str(), ptConf->m["Database Password"]->v.c_str(), ptConf->m["Database"]->v.c_str(), 0, NULL, 0) != NULL)
+            stringstream ssQuery;
+            ssQuery << "select b.aes, b.encrypt, b.id, b.password";
+            if (ptConf->m.find("Aes") != ptConf->m.end() && !ptConf->m["Aes"]->v.empty())
             {
-              stringstream ssQuery;
-              ssQuery << "select b.aes, b.encrypt, b.id, b.password";
-              if (ptConf->m.find("Aes") != ptConf->m.end() && !ptConf->m["Aes"]->v.empty())
+              ssQuery << ", aes_decrypt(from_base64(b.password), sha2('" << escape(ptConf->m["Aes"]->v, strValue) << "', 512)) decrypted_password";
+            }
+            ssQuery << ", c.type from application a, application_account b, account_type c where a.id=b.application_id and b.type_id = c.id and a.name = '" << escape(requestArray["Application"], strValue) << "' and b.user_id = '" << escape(requestArray["User"], strValue) << "'";
+            if (requestArray.find("Type") != requestArray.end() && !requestArray["Type"].empty())
+            {
+              ssQuery << " and c.type = '" << escape(requestArray["Type"], strValue) << "'";
+            }
+            if (mysql_query(conn, ssQuery.str().c_str()) == 0)
+            {
+              list<map<string, string> > getAccount;
+              MYSQL_FIELD *field;
+              MYSQL_RES *result = mysql_store_result(conn);
+              MYSQL_ROW row;
+              vector<string> fieldVector;
+              while ((field = mysql_fetch_field(result)) != NULL)
               {
-                ssQuery << ", aes_decrypt(from_base64(b.password), sha2('" << escape(ptConf->m["Aes"]->v, strValue) << "', 512)) decrypted_password";
+                string strValue;
+                strValue.assign(field->name, field->name_length);
+                fieldVector.push_back(strValue);
               }
-              ssQuery << ", c.type from application a, application_account b, account_type c where a.id=b.application_id and b.type_id = c.id and a.name = '" << escape(requestArray["Application"], strValue) << "' and b.user_id = '" << escape(requestArray["User"], strValue) << "'";
-              if (requestArray.find("Type") != requestArray.end() && !requestArray["Type"].empty())
+              while ((row = mysql_fetch_row(result)))
               {
-                ssQuery << " and c.type = '" << escape(requestArray["Type"], strValue) << "'";
+                map<string, string> getAccountRow;
+                for (unsigned int i = 0; i < fieldVector.size(); i++)
+                {
+                  getAccountRow[fieldVector[i]] = (row[i] != NULL)?row[i]:"";
+                }
+                getAccount.push_back(getAccountRow);
+                getAccountRow.clear();
               }
-              if (mysql_query(conn, ssQuery.str().c_str()) == 0)
+              if (getAccount.size() == 1)
               {
-                list<map<string, string> > getAccount;
-                MYSQL_FIELD *field;
-                MYSQL_RES *result = mysql_store_result(conn);
-                MYSQL_ROW row;
-                vector<string> fieldVector;
-                while ((field = mysql_fetch_field(result)) != NULL)
+                bool bVerified = false;
+                map<string, string> getAccountRow = getAccount.front();
+                if (getAccountRow["encrypt"] == "1")
                 {
-                  string strValue;
-                  strValue.assign(field->name, field->name_length);
-                  fieldVector.push_back(strValue);
-                }
-                while ((row = mysql_fetch_row(result)))
-                {
-                  map<string, string> getAccountRow;
-                  for (unsigned int i = 0; i < fieldVector.size(); i++)
+                  ssQuery.str("");
+                  ssQuery << "select id from application_account where id = " << getAccountRow["id"] << " and `password` = concat('*',upper(sha1(unhex(sha1('" << escape(requestArray["Password"], strValue) << "')))))";
+                  if (mysql_query(conn, ssQuery.str().c_str()) == 0)
                   {
-                    getAccountRow[fieldVector[i]] = (row[i] != NULL)?row[i]:"";
-                  }
-                  getAccount.push_back(getAccountRow);
-                  getAccountRow.clear();
-                }
-                if (getAccount.size() == 1)
-                {
-                  bool bVerified = false;
-                  map<string, string> getAccountRow = getAccount.front();
-                  if (getAccountRow["encrypt"] == "1")
-                  {
-                    ssQuery.str("");
-                    ssQuery << "select id from application_account where id = " << getAccountRow["id"] << " and `password` = concat('*',upper(sha1(unhex(sha1('" << escape(requestArray["Password"], strValue) << "')))))";
-                    if (mysql_query(conn, ssQuery.str().c_str()) == 0)
-                    {
-                      MYSQL_RES *subresult = mysql_store_result(conn);
-                      if ((row = mysql_fetch_row(subresult)))
-                      {
-                        bVerified = true;
-                      }
-                      mysql_free_result(subresult);
-                    }
-                  }
-                  else if (getAccountRow["aes"] == "1")
-                  {
-                    if (getAccountRow.find("decrypted_password") != getAccountRow.end() && getAccountRow["decrypted_password"] == requestArray["Password"])
+                    MYSQL_RES *subresult = mysql_store_result(conn);
+                    if ((row = mysql_fetch_row(subresult)))
                     {
                       bVerified = true;
                     }
+                    mysql_free_result(subresult);
                   }
-                  else if (getAccountRow["password"] == requestArray["Password"])
+                }
+                else if (getAccountRow["aes"] == "1")
+                {
+                  if (getAccountRow.find("decrypted_password") != getAccountRow.end() && getAccountRow["decrypted_password"] == requestArray["Password"])
                   {
                     bVerified = true;
                   }
-                  if (bVerified)
+                }
+                else if (getAccountRow["password"] == requestArray["Password"])
+                {
+                  bVerified = true;
+                }
+                if (bVerified)
+                {
+                  if (requestArray["Function"] == "delete")
                   {
-                    if (requestArray["Function"] == "delete")
-                    {
-                      ssQuery.str("");
-                      ssQuery << "delete from application_account where id = " << getAccountRow["id"];
-                      if (mysql_real_query(conn, ssQuery.str().c_str(), ssQuery.str().size()) >= 0)
-                      {
-                        bProcessed = true;
-                      }
-                      else
-                      {
-                        stringstream ssError;
-                        ssError << "mysql_real_query(" << mysql_errno(conn) << "):  " << mysql_error(conn);
-                        strError = ssError.str();
-                      }
-                    }
-                    else if (requestArray["Function"] == "update")
-                    {
-                      ssQuery.str("");
-                      ssQuery << "update application_account set `password` = ";
-                      if (getAccountRow["encrypt"] == "1")
-                      {
-                        ssQuery << "concat('*',upper(sha1(unhex(sha1('" << escape(requestArray["NewPassword"], strValue) << "')))))";
-                      }
-                      else if (ptConf->m.find("Aes") != ptConf->m.end() && !ptConf->m["Aes"]->v.empty())
-                      {
-                        ssQuery << "to_base64(aes_encrypt('" << escape(requestArray["NewPassword"], strValue) << "', sha2('" << escape(ptConf->m["Aes"]->v, strValue) << "', 512))), aes = 1";
-                      }
-                      else
-                      {
-                        ssQuery << "'" << escape(requestArray["NewPassword"], strValue) << "'";
-                      }
-                      ssQuery << " where id = " << getAccountRow["id"];
-                      if (mysql_real_query(conn, ssQuery.str().c_str(), ssQuery.str().size()) >= 0)
-                      {
-                        bProcessed = true;
-                      }
-                      else
-                      {
-                        stringstream ssError;
-                        ssError << "mysql_real_query(" << mysql_errno(conn) << "):  " << mysql_error(conn);
-                        strError = ssError.str();
-                      }
-                    }
-                    else if (requestArray["Function"] == "verify")
+                    ssQuery.str("");
+                    ssQuery << "delete from application_account where id = " << getAccountRow["id"];
+                    if (mysql_real_query(conn, ssQuery.str().c_str(), ssQuery.str().size()) >= 0)
                     {
                       bProcessed = true;
                     }
+                    else
+                    {
+                      stringstream ssError;
+                      ssError << "mysql_real_query(" << mysql_errno(conn) << "):  " << mysql_error(conn);
+                      strError = ssError.str();
+                    }
                   }
-                  else
+                  else if (requestArray["Function"] == "update")
                   {
-                    strError = "Failed password verification.";
+                    ssQuery.str("");
+                    ssQuery << "update application_account set `password` = ";
+                    if (getAccountRow["encrypt"] == "1")
+                    {
+                      ssQuery << "concat('*',upper(sha1(unhex(sha1('" << escape(requestArray["NewPassword"], strValue) << "')))))";
+                    }
+                    else if (ptConf->m.find("Aes") != ptConf->m.end() && !ptConf->m["Aes"]->v.empty())
+                    {
+                      ssQuery << "to_base64(aes_encrypt('" << escape(requestArray["NewPassword"], strValue) << "', sha2('" << escape(ptConf->m["Aes"]->v, strValue) << "', 512))), aes = 1";
+                    }
+                    else
+                    {
+                      ssQuery << "'" << escape(requestArray["NewPassword"], strValue) << "'";
+                    }
+                    ssQuery << " where id = " << getAccountRow["id"];
+                    if (mysql_real_query(conn, ssQuery.str().c_str(), ssQuery.str().size()) >= 0)
+                    {
+                      bProcessed = true;
+                    }
+                    else
+                    {
+                      stringstream ssError;
+                      ssError << "mysql_real_query(" << mysql_errno(conn) << "):  " << mysql_error(conn);
+                      strError = ssError.str();
+                    }
                   }
-                  getAccountRow.clear();
-                }
-                else if (getAccount.empty())
-                {
-                  strError = "Failed to find the account.";
+                  else if (requestArray["Function"] == "verify")
+                  {
+                    bProcessed = true;
+                  }
                 }
                 else
                 {
-                  stringstream ssError;
-                  ssError << getAccount.size() << " accounts match this criteria.";
-                  strError = ssError.str();
+                  strError = "Failed password verification.";
                 }
-                for (list<map<string, string> >::iterator i = getAccount.begin(); i != getAccount.end(); i++)
-                {
-                  i->clear();
-                }
-                getAccount.clear();
-                mysql_free_result(result);
-                fieldVector.clear();
+                getAccountRow.clear();
+              }
+              else if (getAccount.empty())
+              {
+                strError = "Failed to find the account.";
               }
               else
               {
                 stringstream ssError;
-                ssError << "mysql_query(" << mysql_errno(conn) << "):  " << mysql_error(conn);
+                ssError << getAccount.size() << " accounts match this criteria.";
                 strError = ssError.str();
               }
+              for (list<map<string, string> >::iterator i = getAccount.begin(); i != getAccount.end(); i++)
+              {
+                i->clear();
+              }
+              getAccount.clear();
+              mysql_free_result(result);
+              fieldVector.clear();
             }
             else
             {
               stringstream ssError;
-              ssError << "mysql_real_connect(" << mysql_errno(conn) << "):  " << mysql_error(conn);
+              ssError << "mysql_query(" << mysql_errno(conn) << "):  " << mysql_error(conn);
               strError = ssError.str();
             }
           }
           else
           {
             stringstream ssError;
-            ssError << "mysql_init(" << mysql_errno(conn) << "):  " << mysql_error(conn);
+            ssError << "mysql_real_connect(" << mysql_errno(conn) << "):  " << mysql_error(conn);
             strError = ssError.str();
           }
-          mysql_close(conn);
-        }
-        else if (ptConf->m.find("Database") == ptConf->m.end() || ptConf->m["Database"]->v.empty())
-        {
-          strError = (string)"Failed to read the Database field from the " + strConf + (string)" file.";
-        }
-        else if (ptConf->m.find("Database Password") == ptConf->m.end() || ptConf->m["Database Password"]->v.empty())
-        {
-          strError = (string)"Failed to read the Database Password field from the " + strConf + (string)" file.";
-        }
-        else if (ptConf->m.find("Database Server") == ptConf->m.end() || ptConf->m["Database Server"]->v.empty())
-        {
-          strError = (string)"Failed to read the Database Server field from the " + strConf + (string)" file.";
-        }
-        else if (ptConf->m.find("Database User") == ptConf->m.end() || ptConf->m["Database User"]->v.empty())
-        {
-          strError = (string)"Failed to read the Database User field from the " + strConf + (string)" file.";
         }
         else
         {
-          strError = (string)"Failed to read an unknown field from the " + strConf + (string)" file.";
+          stringstream ssError;
+          ssError << "mysql_init(" << mysql_errno(conn) << "):  " << mysql_error(conn);
+          strError = ssError.str();
         }
+        mysql_close(conn);
+      }
+      else if (ptConf->m.find("Database") == ptConf->m.end() || ptConf->m["Database"]->v.empty())
+      {
+        strError = (string)"Failed to read the Database field from the " + strConf + (string)" file.";
+      }
+      else if (ptConf->m.find("Database Password") == ptConf->m.end() || ptConf->m["Database Password"]->v.empty())
+      {
+        strError = (string)"Failed to read the Database Password field from the " + strConf + (string)" file.";
+      }
+      else if (ptConf->m.find("Database Server") == ptConf->m.end() || ptConf->m["Database Server"]->v.empty())
+      {
+        strError = (string)"Failed to read the Database Server field from the " + strConf + (string)" file.";
+      }
+      else if (ptConf->m.find("Database User") == ptConf->m.end() || ptConf->m["Database User"]->v.empty())
+      {
+        strError = (string)"Failed to read the Database User field from the " + strConf + (string)" file.";
+      }
+      else
+      {
+        strError = (string)"Failed to read an unknown field from the " + strConf + (string)" file.";
       }
       delete ptConf;
     }
