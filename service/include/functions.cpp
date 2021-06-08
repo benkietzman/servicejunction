@@ -323,7 +323,7 @@ void loadRequest(list<string> &request)
     fds[0].events = POLLIN;
     if ((nReturn = poll(fds, 1, 250)) > 0)
     {
-      if (fds[0].revents & POLLIN)
+      if (fds[0].revents & (POLLIN | POLLHUP))
       {
         if ((nReturn = read(0, szBuffer, 65536)) > 0)
         {
