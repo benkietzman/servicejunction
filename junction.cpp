@@ -508,7 +508,7 @@ int main(int argc, char *argv[])
                               if (fds[unfdIndex].fd == fdData)
                               {
                                 // {{{ read
-                                if (fds[unfdIndex].revents & POLLIN)
+                                if (fds[unfdIndex].revents & (POLLIN | POLLHUP))
                                 {
                                   if ((bStandard && gpCentral->utility()->fdRead(fdData, strBuffer[0], nReturn)) || (bSecure && gpCentral->utility()->sslRead(ssl, strBuffer[0], nReturn)))
                                   {
