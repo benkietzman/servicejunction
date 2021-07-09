@@ -145,9 +145,9 @@ int main(int argc, char *argv[])
   {
     strError = "Invalid number of lines in the request.";
   }
-  for (list<Json *>::iterator i = request.begin(); i != request.end(); i++)
+  for (auto &i : request)
   {
-    delete *i;
+    delete i;
   }
   request.clear();
   if (ptJson == NULL)
@@ -164,10 +164,10 @@ int main(int argc, char *argv[])
     cout << ptJson << endl;
   }
   delete ptJson;
-  for (list<Json *>::iterator i = response.begin(); i != response.end(); i++)
+  for (auto &i : response)
   {
-    cout << (*i) << endl;
-    delete (*i);
+    cout << i << endl;
+    delete i;
   }
   response.clear();
 

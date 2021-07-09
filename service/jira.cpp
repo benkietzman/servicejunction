@@ -207,9 +207,9 @@ int main(int argc, char *argv[])
     cout << ptData << endl;
     delete ptData;
   }
-  for (list<Json *>::iterator i = request.begin(); i != request.end(); i++)
+  for (auto &i : request)
   {
-    delete (*i);
+    delete i;
   }
   request.clear();
 

@@ -103,14 +103,14 @@ int main(int argc, char *argv[])
     ptRequest->insert("Error", strError);
   }
   cout << ptRequest << endl;
-  for (list<Json *>::iterator i = request.begin(); i != request.end(); i++)
+  for (auto &i : request)
   {
-    delete (*i);
+    delete i;
   }
   request.clear();
-  for (list<string>::iterator i = response.begin(); i != response.end(); i++)
+  for (auto &i : response)
   {
-    cout << (*i) << endl;
+    cout << i << endl;
   }
   response.clear();
 

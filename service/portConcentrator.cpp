@@ -159,9 +159,9 @@ int main(int argc, char *argv[])
               string strTrim;
               StringManip manip;
               Utility utility(strError);
-              for (list<string>::iterator i = request.begin(); i != request.end(); i++)
+              for (auto &i : request)
               {
-                SSL_write(ssl, ((*i) + (string)"\n").c_str(), (i->size() + 1));
+                SSL_write(ssl, (i + (string)"\n").c_str(), (i.size() + 1));
               }
               SSL_write(ssl, ((string)"end\n").c_str(), 4);
               while (!bProcessed && utility.getLine(ssl, strLine))
@@ -219,9 +219,9 @@ int main(int argc, char *argv[])
   }
   if (bProcessed)
   {
-    for (list<string>::iterator i = response.begin(); i != response.end(); i++)
+    for (auto &i : response)
     {
-      cout << (*i) << endl;
+      cout << i << endl;
     }
   }
   else
@@ -235,9 +235,9 @@ int main(int argc, char *argv[])
     cout << ptJson << endl;
     delete ptJson;
     request.pop_front();
-    for (list<string>::iterator i = request.begin(); i != request.end(); i++)
+    for (auto &i : request)
     {
-      cout << (*i) << endl;
+      cout << i << endl;
     }
   }
   request.clear();

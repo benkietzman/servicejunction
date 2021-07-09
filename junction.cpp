@@ -486,15 +486,15 @@ int main(int argc, char *argv[])
                             fds[unfdSize].events |= POLLOUT;
                           }
                           unfdSize++;
-                          for (list<connection *>::iterator i = queue.begin(); i != queue.end(); i++)
+                          for (auto &i : queue)
                           {
-                            fds[unfdSize].fd = (*i)->readpipe;
+                            fds[unfdSize].fd = i->readpipe;
                             fds[unfdSize].events = POLLIN;
                             unfdSize++;
                             fds[unfdSize].fd = -1;
-                            if (!(*i)->strBuffer[1].empty())
+                            if (!i->strBuffer[1].empty())
                             {
-                              fds[unfdSize].fd = (*i)->writepipe;
+                              fds[unfdSize].fd = i->writepipe;
                               fds[unfdSize].events = POLLOUT;
                             }
                             unfdSize++;
@@ -523,7 +523,7 @@ int main(int argc, char *argv[])
                                       list<string> lines;
                                       string strTrim;
                                       bHaveRequest = false;
-                                      for (list<string>::iterator i = buffer.begin(); !bHaveRequest && i != buffer.end(); i++)
+                                      for (auto i = buffer.begin(); !bHaveRequest && i != buffer.end(); i++)
                                       {
                                         gpCentral->manip()->trim(strTrim, (*i));
                                         if (strTrim == "end")
@@ -737,7 +737,7 @@ int main(int argc, char *argv[])
                               }
                               // }}}
                               // {{{ service pipes
-                              for (list<connection *>::iterator i = queue.begin(); i != queue.end(); i++)
+                              for (auto i = queue.begin(); i != queue.end(); i++)
                               {
                                 bool bDone = false;
                                 string strError;
@@ -813,9 +813,9 @@ int main(int argc, char *argv[])
                                 }
                               }
                               // }}}
-                              for (list<list<connection *>::iterator>::iterator i = removeList.begin(); i != removeList.end(); i++)
+                              for (auto &i : removeList)
                               {
-                                queue.erase(*i);
+                                queue.erase(i);
                               }
                               removeList.clear();
                             }
@@ -827,14 +827,14 @@ int main(int argc, char *argv[])
                           }
                           delete[] fds;
                         }
-                        for (list<connection *>::iterator i = queue.begin(); i != queue.end(); i++)
+                        for (auto &i : queue)
                         {
-                          close((*i)->readpipe);
-                          close((*i)->writepipe);
-                          (*i)->strBuffer[0].clear();
-                          (*i)->strBuffer[1].clear();
-                          delete (*i)->ptRequest;
-                          delete *i;
+                          close(i->readpipe);
+                          close(i->writepipe);
+                          i->strBuffer[0].clear();
+                          i->strBuffer[1].clear();
+                          delete i->ptRequest;
+                          delete i;
                           gpCentral->log("Removed unaccounted for request from queue.");
                         }
                         queue.clear();

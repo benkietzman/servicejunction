@@ -48,9 +48,9 @@ int main(int argc, char *argv[])
     ptJson = new Json;
     strError = "Invalid number of lines in the request.";
   }
-  for (list<Json *>::iterator i = request.begin(); i != request.end(); i++)
+  for (auto &i : request)
   {
-    delete *i;
+    delete i;
   }
   request.clear();
   ptJson->insert("Status", (string)((bProcessed)?"okay":"error"));

@@ -89,19 +89,19 @@ int main(int argc, char *argv[])
       bool bConvertedTime = true;
       if (ptRequest->m.find("Search") != ptRequest->m.end() && ptRequest->m["Search"]->m.find("Time") != ptRequest->m["Search"]->m.end())
       {
-        for (map<string, Json *>::iterator i = ptRequest->m["Search"]->m["Time"]->m.begin(); i != ptRequest->m["Search"]->m["Time"]->m.end(); i++)
+        for (auto &i : ptRequest->m["Search"]->m["Time"]->m)
         {
-          if (!i->second->v.empty())
+          if (!i.second->v.empty())
           {
             struct tm tTime;
-            if (strptime(i->second->v.c_str(), "%Y-%m-%d %H:%M:%S", &tTime) != NULL)
+            if (strptime(i.second->v.c_str(), "%Y-%m-%d %H:%M:%S", &tTime) != NULL)
             {
               time_t CTime;
               if ((CTime = mktime(&tTime)) != -1)
               {
                 stringstream ssTime;
                 ssTime << CTime;
-                i->second->v = ssTime.str();
+                i.second->v = ssTime.str();
               }
               else
               {
@@ -153,11 +153,11 @@ int main(int argc, char *argv[])
                     {
                       if (ptRequest->m.find("Search") != ptRequest->m.end() && ptRequest->m["Search"]->m.find("Time") != ptRequest->m["Search"]->m.end())
                       {
-                        for (map<string, Json *>::iterator i = ptRequest->m["Search"]->m["Time"]->m.begin(); i != ptRequest->m["Search"]->m["Time"]->m.end(); i++)
+                        for (auto &i : ptRequest->m["Search"]->m["Time"]->m)
                         {
-                          if (!i->second->v.empty())
+                          if (!i.second->v.empty())
                           {
-                            stringstream  ssTime(i->second->v);
+                            stringstream  ssTime(i.second->v);
                             struct tm tTime;
                             time_t CTime;
                             ssTime >> CTime;
@@ -166,7 +166,7 @@ int main(int argc, char *argv[])
                               char szTimeStamp[20] = "\0";
                               if (strftime(szTimeStamp, 20, "%Y-%m-%d %H:%M:%S", &tTime) > 0)
                               {
-                                i->second->v = szTimeStamp;
+                                i.second->v = szTimeStamp;
                               }
                             }
                           }
@@ -290,9 +290,9 @@ int main(int argc, char *argv[])
   {
     delete ptRequest;
   }
-  for (list<Json *>::iterator i = request.begin(); i != request.end(); i++)
+  for (auto &i : request)
   {
-    delete (*i);
+    delete i;
   }
   request.clear();
 

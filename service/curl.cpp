@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
       }
       outCookies.close();
     }
-    for (list<string>::iterator i = request.begin(); bProcessed && i != request.end(); i++)
+    for (auto i = request.begin(); bProcessed && i != request.end(); i++)
     {
       map<string, string> data;
       ptJson = new Json(*i);
@@ -91,9 +91,9 @@ int main(int argc, char *argv[])
         string strContent, strCustomRequest, strHeader, strPost, strProxy, strPut, strType, strURL = data["URL"], strUserAgent;
         if (ptJson->m.find("Auth") != ptJson->m.end())
         {
-          for (map<string, Json *>::iterator j = ptJson->m["Auth"]->m.begin(); j != ptJson->m["Auth"]->m.end(); j++)
+          for (auto &j : ptJson->m["Auth"]->m)
           {
-            auth[j->first] = j->second->v;
+            auth[j.first] = j.second->v;
           }
         }
         if (data.find("Cookies") != data.end() && !data["Cookies"].empty())
@@ -157,9 +157,9 @@ int main(int argc, char *argv[])
           {
             strSymbol = "&";
           }
-          for (map<string, Json *>::iterator j = ptJson->m["Get"]->m.begin(); j != ptJson->m["Get"]->m.end(); j++)
+          for (auto &j : ptJson->m["Get"]->m)
           {
-            strURL += strSymbol + manip.urlEncode(strValue, j->first) + (string)"=" + manip.urlEncode(strValue, j->second->v);
+            strURL += strSymbol + manip.urlEncode(strValue, j.first) + (string)"=" + manip.urlEncode(strValue, j.second->v);
             strSymbol = "&";
           }
         }
@@ -175,7 +175,7 @@ int main(int argc, char *argv[])
           }
           else
           {
-            for (map<string, Json *>::iterator j = ptJson->m["Post"]->m.begin(); j != ptJson->m["Post"]->m.end(); j++)
+            for (auto j = ptJson->m["Post"]->m.begin(); j != ptJson->m["Post"]->m.end(); j++)
             {
               if (j != ptJson->m["Post"]->m.begin())
               {
@@ -193,7 +193,7 @@ int main(int argc, char *argv[])
           }
           else
           {
-            for (map<string, Json *>::iterator j = ptJson->m["Put"]->m.begin(); j != ptJson->m["Put"]->m.end(); j++)
+            for (auto j = ptJson->m["Put"]->m.begin(); j != ptJson->m["Put"]->m.end(); j++)
             {
               if (j != ptJson->m["Put"]->m.begin())
               {

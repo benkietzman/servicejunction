@@ -206,9 +206,9 @@ int main(int argc, char *argv[])
                 ssError << getAccount.size() << " accounts match this criteria.";
                 strError = ssError.str();
               }
-              for (list<map<string, string> >::iterator i = getAccount.begin(); i != getAccount.end(); i++)
+              for (auto &i : getAccount)
               {
-                i->clear();
+                i.clear();
               }
               getAccount.clear();
               mysql_free_result(result);

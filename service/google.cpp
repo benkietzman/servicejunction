@@ -168,12 +168,12 @@ int main(int argc, char *argv[])
   delete ptJson;
   if (!responseArray.empty())
   {
-    for (list<map<string, string> >::iterator i = responseArray.begin(); i != responseArray.end(); i++)
+    for (auto &i : responseArray)
     {
-      ptJson = new Json(*i);
+      ptJson = new Json(i);
       cout << ptJson << endl;
       delete ptJson;
-      i->clear();
+      i.clear();
     }
     responseArray.clear();
   } 

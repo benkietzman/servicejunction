@@ -69,11 +69,11 @@ int main(int argc, char *argv[])
       strCategory = ptJson->m["Category"]->v;
     }
     file.directoryList(strData, dir);
-    for (list<string>::iterator i = dir.begin(); i != dir.end(); i++)
+    for (auto &i : dir)
     {
-      if (i->size() > 5 && i->substr(i->size() - 5, 5) == ".json" && (strCategory.empty() || i->substr(0, i->size() - 5) == strCategory))
+      if (i.size() > 5 && i.substr(i.size() - 5, 5) == ".json" && (strCategory.empty() || i.substr(0, i.size() - 5) == strCategory))
       {
-        ifstream  inFile((strData + (string)"/" + (*i)).c_str());
+        ifstream  inFile((strData + (string)"/" + i).c_str());
         if (inFile)
         {
           string strJson;
@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
             Json *ptSubJson = new Json(strJson);
             if (strAcronym.empty() || (ptSubJson->m.find("Acronym") != ptSubJson->m.end() && ptSubJson->m["Acronym"]->v == strAcronym))
             {
-              ptSubJson->insert("Category", i->substr(0, i->size() - 5));
+              ptSubJson->insert("Category", i.substr(0, i.size() - 5));
               response.push_back(ptSubJson);
             }
             else
@@ -101,9 +101,9 @@ int main(int argc, char *argv[])
     ptJson = new Json;
     strError = "Invalid number of lines in the request.";
   }
-  for (list<Json *>::iterator i = request.begin(); i != request.end(); i++)
+  for (auto &i : request)
   {
-    delete *i;
+    delete i;
   }
   request.clear();
   ptJson->insert("Status", (string)((bProcessed)?"okay":"error"));
@@ -113,10 +113,10 @@ int main(int argc, char *argv[])
   }
   cout << ptJson << endl;
   delete ptJson;
-  for (list<Json *>::iterator i = response.begin(); i != response.end(); i++)
+  for (auto &i : response)
   {
-    cout << (*i) << endl;
-    delete (*i);
+    cout << i << endl;
+    delete i;
   }
   response.clear();
 
