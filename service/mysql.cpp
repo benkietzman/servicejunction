@@ -46,88 +46,98 @@ int main(int argc, char *argv[])
     MYSQL *conn;
     if ((conn = mysql_init(NULL)) != NULL)
     {
-      size_t nPosition;
+      bool bRetry;
+      size_t unAttempt = 0, unPosition;
       unsigned int unPort = 0, unTimeout = 2;
       mysql_options(conn, MYSQL_OPT_CONNECT_TIMEOUT, &unTimeout);
-      if ((nPosition = requestArray["Server"].find(":", 0)) != string::npos)
+      if ((unPosition = requestArray["Server"].find(":", 0)) != string::npos)
       {
-        requestArray["Port"] = requestArray["Server"].substr(nPosition + 1, requestArray["Server"].size() - (nPosition + 1));
-        requestArray["Server"].erase(nPosition, requestArray["Server"].size() - nPosition);
+        requestArray["Port"] = requestArray["Server"].substr(unPosition + 1, requestArray["Server"].size() - (unPosition + 1));
+        requestArray["Server"].erase(unPosition, requestArray["Server"].size() - unPosition);
       }
       if (requestArray.find("Port") != requestArray.end() && !requestArray["Port"].empty())
       {
         unPort = atoi(requestArray["Port"].c_str());
       }
-      if (mysql_real_connect(conn, requestArray["Server"].c_str(), requestArray["User"].c_str(), requestArray["Password"].c_str(), requestArray["Database"].c_str(), unPort, NULL, 0) != NULL)
+      do
       {
-        if (requestArray.find("Query") != requestArray.end() && !requestArray["Query"].empty())
+        bRetry = false;
+        strError.clear();
+        if (mysql_real_connect(conn, requestArray["Server"].c_str(), requestArray["User"].c_str(), requestArray["Password"].c_str(), requestArray["Database"].c_str(), unPort, NULL, 0) != NULL)
         {
-          if (mysql_query(conn, requestArray["Query"].c_str()) == 0)
+          if (requestArray.find("Query") != requestArray.end() && !requestArray["Query"].empty())
           {
-            MYSQL_RES *result = NULL;
-            bProcessed = true;
-            if ((result = mysql_store_result(conn)) != NULL)
+            if (mysql_query(conn, requestArray["Query"].c_str()) == 0)
             {
-              vector<string> fieldVector;
-              MYSQL_ROW row;
-              MYSQL_FIELD *field;
-              while ((field = mysql_fetch_field(result)) != NULL)
+              MYSQL_RES *result = NULL;
+              bProcessed = true;
+              if ((result = mysql_store_result(conn)) != NULL)
               {
-                string strValue;
-                strValue.assign(field->name, field->name_length);
-                fieldVector.push_back(strValue);
-              }
-              while ((row = mysql_fetch_row(result)))
-              {
-                map<string, string> rowMap;
-                for (unsigned int i = 0; i < fieldVector.size(); i++)
+                vector<string> fieldVector;
+                MYSQL_ROW row;
+                MYSQL_FIELD *field;
+                while ((field = mysql_fetch_field(result)) != NULL)
                 {
-                  rowMap[fieldVector[i]] = (row[i] != NULL)?row[i]:"";
+                  string strValue;
+                  strValue.assign(field->name, field->name_length);
+                  fieldVector.push_back(strValue);
                 }
-                responseArray.push_back(rowMap);
-                rowMap.clear();
+                while ((row = mysql_fetch_row(result)))
+                {
+                  map<string, string> rowMap;
+                  for (unsigned int i = 0; i < fieldVector.size(); i++)
+                  {
+                    rowMap[fieldVector[i]] = (row[i] != NULL)?row[i]:"";
+                  }
+                  responseArray.push_back(rowMap);
+                  rowMap.clear();
+                }
+                fieldVector.clear();
+                mysql_free_result(result);
               }
-              fieldVector.clear();
-              mysql_free_result(result);
             }
-          }
-          else
-          {
-            stringstream ssError;
-            ssError << "mysql_query(" << mysql_errno(conn) << "):  " << mysql_error(conn);
-            strError = ssError.str();
-          }
-        }
-        else if (requestArray.find("Update") != requestArray.end() && !requestArray["Update"].empty())
-        {
-          if (mysql_real_query(conn, requestArray["Update"].c_str(), requestArray["Update"].size()) == 0)
-          {
-            stringstream ssRows;
-            my_ulonglong ulID = mysql_insert_id(conn), ulRows = mysql_affected_rows(conn);
-            bProcessed = true;
-            if (ulID > 0)
+            else
             {
-              stringstream ssID;
-              ssID << ulID;
-              requestArray["ID"] = ssID.str();
+              stringstream ssError;
+              ssError << "mysql_query(" << mysql_errno(conn) << "):  " << mysql_error(conn);
+              strError = ssError.str();
             }
-            ssRows << ulRows;
-            requestArray["Rows"] = ssRows.str();
           }
-          else
+          else if (requestArray.find("Update") != requestArray.end() && !requestArray["Update"].empty())
           {
-            stringstream ssError;
-            ssError << "mysql_query(" << mysql_errno(conn) << "):  " << mysql_error(conn);
-            strError = ssError.str();
+            if (mysql_real_query(conn, requestArray["Update"].c_str(), requestArray["Update"].size()) == 0)
+            {
+              stringstream ssRows;
+              my_ulonglong ulID = mysql_insert_id(conn), ulRows = mysql_affected_rows(conn);
+              bProcessed = true;
+              if (ulID > 0)
+              {
+                stringstream ssID;
+                ssID << ulID;
+                requestArray["ID"] = ssID.str();
+              }
+              ssRows << ulRows;
+              requestArray["Rows"] = ssRows.str();
+            }
+            else
+            {
+              stringstream ssError;
+              ssError << "mysql_query(" << mysql_errno(conn) << "):  " << mysql_error(conn);
+              strError = ssError.str();
+            }
           }
         }
-      }
-      else
-      {
-        stringstream ssError;
-        ssError << "mysql_real_connect(" << mysql_errno(conn) << "):  " << mysql_error(conn);
-        strError = ssError.str();
-      }
+        else
+        {
+          stringstream ssError;
+          ssError << "mysql_real_connect(" << mysql_errno(conn) << "):  " << mysql_error(conn);
+          strError = ssError.str();
+          if (mysql_errno(conn) == 2026)
+          {
+            bRetry = true;
+          }
+        }
+      } while (bRetry && unAttempt++ < 10);
     }
     else
     {
