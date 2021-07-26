@@ -232,7 +232,7 @@ int main(int argc, char *argv[])
               stringstream ssError;
               ssError << "mysql_real_connect(" << mysql_errno(conn) << "):  " << mysql_error(conn);
               strError = ssError.str();
-              if (mysql_errno(conn) == 2026)
+              if (mysql_errno(conn) == 2005 || mysql_errno(conn) == 2026)
               {
                 bRetry = true;
               }
