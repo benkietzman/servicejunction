@@ -470,7 +470,6 @@ int main(int argc, char *argv[])
                       {
                         gpCentral->log((string)"Warden::vaultRetrieve() error " + strError);
                       }
-cout << "WARDEN:  " << ptWarden << endl;
                     }
                   }
                   // }}}
