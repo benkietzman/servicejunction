@@ -371,7 +371,7 @@ void loadRequest(map<string, string> &requestArray, list<string> &request)
   if (!request.empty())
   {
     Json *ptJson = new Json(request.front());
-    ptJson->flatten(requestArray, true);
+    ptJson->flatten(requestArray, false, false);
     delete ptJson;
   }
 }
