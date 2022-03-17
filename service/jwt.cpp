@@ -48,13 +48,11 @@ int main(int argc, char *argv[])
     ptJson = new Json(request.front());
     if (ptRequest->m.find("Signer") != ptRequest->m.end() && !ptRequest->m["Signer"]->v.empty())
     {
-      bool bDecode = false;
-      MessageSigner *pSigner = NULL;
+      MessageSigner *pSigner = nullptr;
       if (ptRequest->m["Signer"]->v == "HS256" || ptRequest->m["Signer"]->v == "HS384" || ptRequest->m["Signer"]->v == "HS512")
       {
         if (ptRequest->m.find("Secret") != ptRequest->m.end() && !ptRequest->m["Secret"]->v.empty())
         {
-          bDecode = true;
           if (ptRequest->m["Signer"]->v == "HS256")
           {
             pSigner = new HS256Validator(ptRequest->m["Secret"]->v);
@@ -68,10 +66,6 @@ int main(int argc, char *argv[])
             pSigner = new HS512Validator(ptRequest->m["Secret"]->v);
           }
         }
-        else
-        {
-          strError = "Please provide the Secret.";
-        }
       }
       else if (ptRequest->m["Signer"]->v == "RS256" || ptRequest->m["Signer"]->v == "RS384" || ptRequest->m["Signer"]->v == "RS512")
       {
@@ -79,7 +73,6 @@ int main(int argc, char *argv[])
         {
           if (ptRequest->m.find("Private Key") != ptRequest->m.end() && !ptRequest->m["Private Key"]->v.empty())
           {
-            bDecode = true;
             if (ptRequest->m["Signer"]->v == "RS256")
             {
               pSigner = new RS256Validator(ptRequest->m["Public Key"]->v, ptRequest->m["Private Key"]->v);
@@ -114,83 +107,72 @@ int main(int argc, char *argv[])
           strError = "Please provide the Public Key.";
         }
       }
-      if (pSigner != NULL)
+      if (ptRequest->m.find("Payload") != ptRequest->m.end())
       {
-        if (ptRequest->m.find("Payload") != ptRequest->m.end())
+        if (ptJson->m.find("Function") != ptJson->m.end() && !ptJson->m["Function"]->v.empty())
         {
-          if (ptJson->m.find("Function") != ptJson->m.end() && !ptJson->m["Function"]->v.empty())
+          if (ptJson->m["Function"]->v == "decode")
           {
-            if (ptJson->m["Function"]->v == "decode")
+            ExpValidator exp;
+            json header, payload;
+            try
             {
-              if (bDecode)
-              {
-                ExpValidator exp;
-                json header, payload;
-                try
-                {
-                  stringstream ssHeader, ssPayload;
-                  Json *ptResponse = new Json;
-                  bProcessed = true;
-                  tie(header, payload) = JWT::Decode(ptRequest->m["Payload"]->v, pSigner, &exp);
-                  ssHeader << header;
-                  ptResponse->m["Header"] = new Json(ssHeader.str());
-                  ssPayload << payload;
-                  ptResponse->m["Payload"] = new Json(ssPayload.str());
-                  response.push_back(ptResponse);
-                }
-                catch (InvalidTokenError &tfe)
-                {
-                  bProcessed = false;
-                  strError = tfe.what();
-                }
-                catch (exception &e)
-                {
-                  bProcessed = false;
-                  strError = e.what();
-                }
-              }
-              else
-              {
-                strError = "Please provide a Signer capable of decoding.";
-              }
+              stringstream ssHeader, ssPayload;
+              Json *ptResponse = new Json;
+              bProcessed = true;
+              tie(header, payload) = JWT::Decode(ptRequest->m["Payload"]->v, pSigner, &exp);
+              ssHeader << header;
+              ptResponse->m["Header"] = new Json(ssHeader.str());
+              ssPayload << payload;
+              ptResponse->m["Payload"] = new Json(ssPayload.str());
+              response.push_back(ptResponse);
             }
-            else if (ptJson->m["Function"]->v == "encode")
+            catch (InvalidTokenError &tfe)
             {
-              json data;
-              try
-              {
-                stringstream ssJson(ptRequest->m["Payload"]->json(strValue));
-                Json *ptResponse = new Json;
-                bProcessed = true;
-                ssJson >> data;
-                ptResponse->insert("Payload", JWT::Encode((*pSigner), data));
-                response.push_back(ptResponse);
-              }
-              catch (exception &e)
-              {
-                bProcessed = false;
-                strError = e.what();
-              }
+              bProcessed = false;
+              strError = tfe.what();
             }
-            else
+            catch (exception &e)
             {
-              strError = "Please provide a valid Function:  decode, encode.";
+              bProcessed = false;
+              strError = e.what();
+            }
+          }
+          else if (ptJson->m["Function"]->v == "encode")
+          {
+            json data;
+            try
+            {
+              stringstream ssJson(ptRequest->m["Payload"]->json(strValue));
+              Json *ptResponse = new Json;
+              bProcessed = true;
+              ssJson >> data;
+              ptResponse->insert("Payload", JWT::Encode((*pSigner), data));
+              response.push_back(ptResponse);
+            }
+            catch (exception &e)
+            {
+              bProcessed = false;
+              strError = e.what();
             }
           }
           else
           {
-            strError = "Please provide the Function.";
+            strError = "Please provide a valid Function:  decode, encode.";
           }
         }
         else
         {
-          strError = "Please provide the Payload.";
+          strError = "Please provide the Function.";
         }
-        delete pSigner;
       }
-      else if (strError.empty())
+      else
       {
-        strError = "Please provide a valid Signer:  HS256, HS384, HS512, RS256, RS384, RS512.";
+        strError = "Please provide the Payload.";
+      }
+      if (pSigner != nullptr)
+      {
+        delete pSigner;
       }
     }
     else
