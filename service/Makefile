@@ -11,7 +11,7 @@
 #MAKEFLAGS="-j ${C}"
 MAKE_UNAME=`uname -s`
 
-all: bin/acorn bin/acronym bin/addrInfo bin/curl bin/format bin/google bin/jira bin/jwt bin/logger bin/mssql bin/mysql bin/password bin/pdf bin/ping bin/portConcentrator bin/samba bin/transmission bin/warden bin/zoneMinder
+all: bin/acorn bin/acronym bin/addrInfo bin/aes bin/curl bin/format bin/google bin/jira bin/jwt bin/logger bin/mssql bin/mysql bin/password bin/pdf bin/ping bin/portConcentrator bin/samba bin/transmission bin/warden bin/zoneMinder
 
 bin/acorn: ../../common/libcommon.a obj/functions.o obj/acorn.o bin
 	g++ -o bin/acorn obj/acorn.o obj/functions.o -L/data/extras/lib -L../../common -lcommon -lb64 -lcrypto -lcurl -lexpat -lmjson -lnsl -lpthread -lssl -ltar -lz
@@ -21,6 +21,9 @@ bin/acronym: ../../common/libcommon.a obj/functions.o obj/acronym.o bin
 
 bin/addrInfo: ../../common/libcommon.a obj/functions.o obj/addrInfo.o bin
 	g++ -o bin/addrInfo obj/addrInfo.o obj/functions.o -L/data/extras/lib -L../../common -lcommon -lb64 -lcrypto -lcurl -lexpat -lmjson -lnsl -lpthread -lssl -ltar -lz
+
+bin/aes: ../../common/libcommon.a obj/functions.o obj/aes.o bin
+	g++ -o bin/aes obj/aes.o obj/functions.o -L/usr/local/lib -L/data/extras/lib -L../../common -lcommon -lb64 -lcrypto -lcurl -lexpat -lmjson -lnsl -lpthread -lssl -ltar -lz
 
 bin/curl: ../../common/libcommon.a obj/functions.o obj/curl.o bin
 	g++ -o bin/curl obj/curl.o obj/functions.o -L/data/extras/lib -L../../common -lcommon -lb64 -lcrypto -lcurl -lexpat -lmjson -lnsl -lpthread -lssl -ltar -lz
@@ -93,6 +96,9 @@ obj/acronym.o: acronym.cpp obj ../../common/Makefile
 
 obj/addrInfo.o: addrInfo.cpp obj ../../common/Makefile
 	g++ -g -Wall -c addrInfo.cpp -o obj/addrInfo.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
+
+obj/aes.o: aes.cpp obj ../../common/Makefile
+	g++ -g -Wall -c aes.cpp -o obj/aes.o -I/usr/local/include -I/usr/local/ssl/include -I/data/extras/include -I../../common;
 
 obj/curl.o: curl.cpp obj ../../common/Makefile
 	g++ -g -Wall -c curl.cpp -o obj/curl.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
