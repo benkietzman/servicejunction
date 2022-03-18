@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
     {
       if (ptJson->m.find("Function") != ptJson->m.end() && !ptJson->m["Function"]->v.empty())
       {
-        if (ptJson->m.find("Secret") != ptJson->m.end() && !ptJson->m["Secret"]->v.empty())
+        if (ptRequest->m.find("Secret") != ptRequest->m.end() && !ptRequest->m["Secret"]->v.empty())
         {
           if (ptJson->m["Function"]->v == "decrypt")
           {
