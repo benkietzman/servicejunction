@@ -51,14 +51,14 @@ int main(int argc, char *argv[])
       {
         if (ptJson->m.find("Secret") != ptJson->m.end() && !ptJson->m["Secret"]->v.empty())
         {
-          if (ptJson->m["Function"]->v == "decode")
+          if (ptJson->m["Function"]->v == "decrypt")
           {
             Json *ptResponse = new Json;
             bProcessed = true;
             ptResponse->insert("Payload", manip.decryptAes(manip.decodeBase64(ptRequest->m["Payload"]->v, strValue), ptRequest->m["Secret"]->v, strValue, strError));
             response.push_back(ptResponse);
           }
-          else if (ptJson->m["Function"]->v == "encode")
+          else if (ptJson->m["Function"]->v == "encrypt")
           {
             Json *ptResponse = new Json;
             bProcessed = true;
@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
           }
           else
           {
-            strError = "Please provide a valid Function:  decode, encode.";
+            strError = "Please provide a valid Function:  decrypt, encrypt.";
           }
         }
         else
