@@ -173,6 +173,10 @@ int main(int argc, char *argv[])
           {
             ptJson->m["Post"]->json(strPost);
           }
+          else if (strType == "plain")
+          {
+            strPost = ptJson->m["Post"]->v;
+          }
           else
           {
             for (auto j = ptJson->m["Post"]->m.begin(); j != ptJson->m["Post"]->m.end(); j++)

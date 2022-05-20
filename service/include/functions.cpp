@@ -116,12 +116,19 @@ bool fetchPage(string &strUrl, const string strType, map<string, string> auth, c
   curl_easy_setopt(ch, CURLOPT_FOLLOWLOCATION, true);
   if (!strPost.empty() && strPost != "null" && strPost != "\"\"")
   {
-    if (strType == "json")
+    if (strType == "json" || strType == "plain")
     {
       stringstream ssLength;
       bHeader = true;
       curl_easy_setopt(ch, CURLOPT_CUSTOMREQUEST, "POST");
-      headers = curl_slist_append(headers, "Content-Type: application/json");
+      if (strType == "json")
+      {
+        headers = curl_slist_append(headers, "Content-Type: application/json");
+      }
+      else
+      {
+        headers = curl_slist_append(headers, "Content-Type: text/plain");
+      }
       ssLength << "Content-Length: " << strPost.size();
       headers = curl_slist_append(headers, ssLength.str().c_str());
     }
