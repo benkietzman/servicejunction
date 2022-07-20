@@ -195,22 +195,16 @@ int main(int argc, char *argv[])
                   }
                   if (fds[0].revents & POLLOUT)
                   {
-                    if (!strBuffers[0].empty())
+                    if (!strBuffers[1].empty())
                     {
                       if (utility.fdWrite(fdSocket, strBuffers[1], nReturn))
                       {
-                        if (strBuffers[1].empty())
+                        if (strBuffers[1].empty() && (ssl = utility.sslConnect(ctx, fdSocket, strError)) == NULL)
                         {
-                          if ((ssl = utility.sslConnect(ctx, fdSocket, strError)) != NULL)
-                          {
-                          }
-                          else
-                          {
-                            bExit = true;
-                            ssMessage.str("");
-                            ssMessage << "utility::sslConnect() " << strError;
-                            strError = ssMessage.str();
-                          }
+                          bExit = true;
+                          ssMessage.str("");
+                          ssMessage << "utility::sslConnect() " << strError;
+                          strError = ssMessage.str();
                         }
                       }
                       else
