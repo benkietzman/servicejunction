@@ -47,9 +47,6 @@ int main(int argc, char *argv[])
   Utility utility(strError);
 
   setlocale(LC_ALL, "");
-  SSL_library_init();
-  OpenSSL_add_all_algorithms();
-  SSL_load_error_strings();
   loadRequest(requestArray, request);
   if (requestArray.find("SubService") != requestArray.end() && !requestArray["SubService"].empty() && requestArray.find("Throttle") != requestArray.end() && !requestArray["Throttle"].empty())
   {
@@ -257,6 +254,7 @@ int main(int argc, char *argv[])
           }
         }
         SSL_CTX_free(ctx);
+        utility.sslDeinit();
       }
       else
       {
