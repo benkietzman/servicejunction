@@ -27,6 +27,7 @@ install: bin/acorn bin/acronym bin/addrInfo bin/aes central.php bin/curl email.p
 	install --mode=775 bin/jira $(prefix)/servicejunction/service/
 	install --mode=775 bin/jwt $(prefix)/servicejunction/service/
 	install --mode=664 listServices.php $(prefix)/servicejunction/service/
+	install --mode=664 location.php $(prefix)/servicejunction/service/
 	install --mode=775 bin/logger $(prefix)/servicejunction/service/
 	install --mode=775 bin/mssql $(prefix)/servicejunction/service/
 	install --mode=775 bin/mysql $(prefix)/servicejunction/service/
