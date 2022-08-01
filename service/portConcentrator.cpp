@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
         for (int i = 0; !bConnected && i < 2; i++)
         {
           int fdSocket, nReturn;
-          SSL *ssl;
+          SSL *ssl = NULL;
           string strServer, strPort;
           struct addrinfo hints, *result;
           strError.clear();
@@ -235,8 +235,11 @@ int main(int argc, char *argv[])
                   strError = ssMessage.str();
                 }
               }
-              SSL_shutdown(ssl);
-              SSL_free(ssl);
+              if (ssl != NULL)
+              {
+                SSL_shutdown(ssl);
+                SSL_free(ssl);
+              }
               close(fdSocket);
             }
             else
