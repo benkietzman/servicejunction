@@ -77,6 +77,10 @@ int main(int argc, char *argv[])
         {
           bool bRetry;
           size_t unAttempt = 0;
+          unsigned int unTimeoutConnect = 5, unTimeoutRead = 5, unTimeoutWrite = 5;
+          mysql_options(conn, MYSQL_OPT_CONNECT_TIMEOUT, &unTimeoutConnect);
+          mysql_options(conn, MYSQL_OPT_READ_TIMEOUT, &unTimeoutRead);
+          mysql_options(conn, MYSQL_OPT_WRITE_TIMEOUT, &unTimeoutWrite);
           do
           {
             bRetry = false;
