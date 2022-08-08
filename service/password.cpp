@@ -76,16 +76,26 @@ int main(int argc, char *argv[])
         if ((conn = mysql_init(NULL)) != NULL)
         {
           bool bRetry;
-          size_t unAttempt = 0;
-          unsigned int unTimeoutConnect = 5, unTimeoutRead = 5, unTimeoutWrite = 5;
+          size_t unAttempt = 0, unPosition;
+          string strPort, strServer = ptConf->m["Database Server"]->v;
+          unsigned int unPort = 0, unTimeoutConnect = 5, unTimeoutRead = 5, unTimeoutWrite = 5;
           mysql_options(conn, MYSQL_OPT_CONNECT_TIMEOUT, &unTimeoutConnect);
           mysql_options(conn, MYSQL_OPT_READ_TIMEOUT, &unTimeoutRead);
           mysql_options(conn, MYSQL_OPT_WRITE_TIMEOUT, &unTimeoutWrite);
+          if ((unPosition = strServer.find(":", 0)) != string::npos)
+          {
+            strPort = strServer.substr(unPosition + 1, strServer.size() - (unPosition + 1));
+            strServer.erase(unPosition, strServer.size() - unPosition);
+          }
+          if (!strPort.empty())
+          {
+            unPort = atoi(strPort.c_str());
+          }
           do
           {
             bRetry = false;
             strError.clear();
-            if (mysql_real_connect(conn, ptConf->m["Database Server"]->v.c_str(), ptConf->m["Database User"]->v.c_str(), ptConf->m["Database Password"]->v.c_str(), ptConf->m["Database"]->v.c_str(), 0, NULL, 0) != NULL)
+            if (mysql_real_connect(conn, strServer.c_str(), ptConf->m["Database User"]->v.c_str(), ptConf->m["Database Password"]->v.c_str(), ptConf->m["Database"]->v.c_str(), unPort, NULL, 0) != NULL)
             {
               stringstream ssQuery;
               ssQuery << "select b.aes, b.encrypt, b.id, b.password";
