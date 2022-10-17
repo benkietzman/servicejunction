@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
         else
         {
           stringstream ssError;
-          ssError << "dbconn():  " << gstrError;
+          ssError << "dbopen():  " << gstrError;
           strError = ssError.str();
         }
         dbloginfree(login);
