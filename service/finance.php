@@ -398,64 +398,23 @@ if (isset($requestArray['Function']) && $requestArray['Function'] != '' && ($req
   {
     if (isset($requestArray['Symbol']) && $requestArray['Symbol'] != '')
     {
-      if (($strData = @file_get_contents('http://finance.google.com/finance/info?q='.$requestArray['Symbol'])) !== false)
+      if (($strData = @file_get_contents('https://alphavantage.co/query?function=GLOBAL_QUOTE&symbol='.$requestArray['Symbol'].'&apikey=BD4ZBZ7QJC684HLD')) !== false)
       {
-        $strData = trim(str_replace('[', '', str_replace(']', '', str_replace('//', '', str_replace("\n", '', $strData)))));
         if (($data = json_decode($strData, true)) !== false)
         {
           $response = array();
           $bProcessed = true;
-          $response['Symbol'] = $data['t'];
-          $response['Exchange'] = $data['e'];
-          $response['Last'] = str_replace(',', '', $data['l']);
-          $response['Date'] = $data['lt'];
-          $response['Time'] = $data['ltt'];
-          $response['Change'] = $data['c'];
-          $response['PercentageChange'] = $data['cp'];
+          $response['Symbol'] = $data['Global Quote']['01. symbol'];
+          $response['Last'] = str_replace(',', '', $data['Global Quote']['05. price']);
+          $response['Date'] = $data['Global Quote']['07. latest trading day'];
+          $response['Change'] = $data['Global Quote']['09. change'];
+          $response['PercentageChange'] = $data['Global Quote']['10. change percent'];
           unset($data);
         }
       }
-      if (!$bProcessed)
+      else
       {
-        $strError = null;
-        unset($response);
-        $response = null;
-        if (($strData = @file_get_contents('https://www.google.com/finance/getprices?q='.$requestArray['Symbol'])) !== false)
-        {
-          $bFound = false;
-          $bProcessed = true;
-          $data = explode("\n", $strData);
-          $response = array();
-          $response['Symbol'] = $requestArray['Symbol'];
-          for ($i = 0; !$bFound && $i < sizeof($data); $i++)
-          {
-            $strLine = trim($data[$i]);
-            if (strlen($strLine) > 8 && substr($strLine, 0, 8) == 'EXCHANGE')
-            {
-              $item = explode('%3d', $strLine);
-              if (sizeof($item) > 1)
-              {
-                $response['Exchange'] = $item[1];
-              }
-              unset($item);
-            }
-            else if (strlen($strLine) > 0 && $strLine[0] == 'a')
-            {
-              $item = explode(',', $strLine);
-              if (sizeof($item) > 1)
-              {
-                $response['Last'] = str_replace(',', '', $item[1]);
-                $response['Timestamp'] = substr($item[0], 1, strlen($item[0]) - 1);
-              }
-              unset($item);
-            }
-          }
-          unset($data);
-        }
-        else
-        {
-          $strError = 'Failed to connect to the Google Finance URL.';
-        }
+        $strError = 'Failed to connect to the Alphavantage URL.';
       }
     }
     else
