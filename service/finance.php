@@ -398,23 +398,30 @@ if (isset($requestArray['Function']) && $requestArray['Function'] != '' && ($req
   {
     if (isset($requestArray['Symbol']) && $requestArray['Symbol'] != '')
     {
-      if (($strData = @file_get_contents('https://alphavantage.co/query?function=GLOBAL_QUOTE&symbol='.$requestArray['Symbol'].'&apikey=BD4ZBZ7QJC684HLD')) !== false)
+      if (isset($requestArray['Key']) && $requestArray['Key'] != '')
       {
-        if (($data = json_decode($strData, true)) !== false)
+        if (($strData = @file_get_contents('https://alphavantage.co/query?function=GLOBAL_QUOTE&symbol='.$requestArray['Symbol'].'&apikey='.$requestArray['Key'])) !== false)
         {
-          $response = array();
-          $bProcessed = true;
-          $response['Symbol'] = $data['Global Quote']['01. symbol'];
-          $response['Last'] = str_replace(',', '', $data['Global Quote']['05. price']);
-          $response['Date'] = $data['Global Quote']['07. latest trading day'];
-          $response['Change'] = $data['Global Quote']['09. change'];
-          $response['PercentageChange'] = $data['Global Quote']['10. change percent'];
-          unset($data);
+          if (($data = json_decode($strData, true)) !== false)
+          {
+            $response = array();
+            $bProcessed = true;
+            $response['Symbol'] = $data['Global Quote']['01. symbol'];
+            $response['Last'] = str_replace(',', '', $data['Global Quote']['05. price']);
+            $response['Date'] = $data['Global Quote']['07. latest trading day'];
+            $response['Change'] = $data['Global Quote']['09. change'];
+            $response['PercentageChange'] = $data['Global Quote']['10. change percent'];
+            unset($data);
+          }
+        }
+        else
+        {
+          $strError = 'Failed to connect to the Alphavantage URL.';
         }
       }
       else
       {
-        $strError = 'Failed to connect to the Alphavantage URL.';
+        $strError = 'Please provide the Key.';
       }
     }
     else
