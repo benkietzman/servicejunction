@@ -404,13 +404,31 @@ if (isset($requestArray['Function']) && $requestArray['Function'] != '' && ($req
         {
           if (($data = json_decode($strData, true)) !== false)
           {
-            $response = array();
-            $bProcessed = true;
-            $response['Symbol'] = $data['Global Quote']['01. symbol'];
-            $response['Last'] = str_replace(',', '', $data['Global Quote']['05. price']);
-            $response['Date'] = $data['Global Quote']['07. latest trading day'];
-            $response['Change'] = $data['Global Quote']['09. change'];
-            $response['PercentageChange'] = $data['Global Quote']['10. change percent'];
+            if (isset($data['Global Quote']) && is_array($data['Global Quote']))
+            {
+              if (isset($data['Global Quote']['01. symbol']) && $data['Global Quote']['01. symbol'] != '')
+              {
+                $response = array();
+                $bProcessed = true;
+                $response['Symbol'] = $data['Global Quote']['01. symbol'];
+                $response['Last'] = str_replace(',', '', $data['Global Quote']['05. price']);
+                $response['Date'] = $data['Global Quote']['07. latest trading day'];
+                $response['Change'] = $data['Global Quote']['09. change'];
+                $response['PercentageChange'] = $data['Global Quote']['10. change percent'];
+              }
+              else
+              {
+                $strError = 'Please provide a valid Symbol.';
+              }
+            }
+            else if (isset($data['Error Message']) && $data['Error Message'] != '')
+            {
+              $strError = $data['Error Message'];
+            }
+            else
+            {
+              $strError = 'Encountered an unnkown error.  '.json_encode($data);
+            }
             unset($data);
           }
         }
