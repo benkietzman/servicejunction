@@ -144,15 +144,9 @@ int main(int argc, char *argv[])
         strContent.erase(unPosition, 1);
       }
       ptData = new Json(strContent);
-      if (bCurl)
+      if (!ptData->m.empty())
       {
         bProcessed = true;
-      }
-      else if (!strContent.empty())
-      {
-        strErrorType = "bls";
-        strErrorSubType = "unknown";
-        strError = "unkown";
       }
       else
       {
