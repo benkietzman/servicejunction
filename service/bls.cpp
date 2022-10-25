@@ -99,7 +99,6 @@ int main(int argc, char *argv[])
     label["Version"] = strVersion;
     if (request.front()->m.find("Resource") != request.front()->m.end() && !request.front()->m["Resource"]->v.empty())
     {
-      bool bCurl = false;
       size_t unPosition;
       string strContent, strCookies, strHeader, strPage, strProxy, strSearch, strServer = "api.bls.gov", strURL = (string)"https://" + strServer + (string)"/" + strApi + (string)"/" + strVersion + (string)"/" + request.front()->m["Resource"]->v;
       Json *ptAuth = NULL, *ptGet = NULL, *ptPost = NULL, *ptPut = NULL;
@@ -130,7 +129,7 @@ int main(int argc, char *argv[])
           ptPut = request.back()->m["Put"];
         }
       }
-      bCurl = pJunction->curl(strURL + strPage, "json", ptAuth, ptGet, ptPost, ptPut, strProxy, strCookies, strHeader, strContent, strError, "", false, false);
+      pJunction->curl(strURL + strPage, "json", ptAuth, ptGet, ptPost, ptPut, strProxy, strCookies, strHeader, strContent, strError, "", false, false);
       if (ptAuth != NULL)
       {
         delete ptAuth;
