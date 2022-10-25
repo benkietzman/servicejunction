@@ -10,12 +10,13 @@
 # {{{ prep work
 MAKE_UNAME=`uname -s`
 prefix=/usr/local
-all: bin/acorn bin/acronym bin/addrInfo bin/aes bin/curl bin/format bin/google bin/jira bin/jwt bin/logger bin/mssql bin/mysql bin/password bin/pdf bin/ping bin/portConcentrator bin/samba bin/transmission bin/warden bin/zoneMinder
-install: bin/acorn bin/acronym bin/addrInfo bin/aes central.php bin/curl email.php finance.php bin/format functions.php bin/google ircBot.php bin/jira bin/jwt listServices.php bin/logger bin/mssql bin/mysql oracle.php bin/password bin/pdf bin/ping bin/portConcentrator bin/samba soap.php sysInfo.php tcpdf.php bin/transmission bin/warden weather.php bin/zoneMinder
+all: bin/acorn bin/acronym bin/addrInfo bin/aes bin/bls bin/curl bin/format bin/google bin/jira bin/jwt bin/logger bin/mssql bin/mysql bin/password bin/pdf bin/ping bin/portConcentrator bin/samba bin/transmission bin/warden bin/zoneMinder
+install: bin/acorn bin/acronym bin/addrInfo bin/aes bin/bls central.php bin/curl email.php finance.php bin/format functions.php bin/google ircBot.php bin/jira bin/jwt listServices.php bin/logger bin/mssql bin/mysql oracle.php bin/password bin/pdf bin/ping bin/portConcentrator bin/samba soap.php sysInfo.php tcpdf.php bin/transmission bin/warden weather.php bin/zoneMinder
 	install --mode=775 bin/acorn $(prefix)/servicejunction/service/
 	install --mode=775 bin/acronym $(prefix)/servicejunction/service/
 	install --mode=775 bin/addrInfo $(prefix)/servicejunction/service/
 	install --mode=775 bin/aes $(prefix)/servicejunction/service/
+	install --mode=775 bin/bls $(prefix)/servicejunction/service/
 	install --mode=664 central.php $(prefix)/servicejunction/service/
 	install --mode=775 bin/curl $(prefix)/servicejunction/service/
 	install --mode=664 email.php $(prefix)/servicejunction/service/
@@ -77,6 +78,14 @@ bin/aes: ../../common/libcommon.a obj/functions.o obj/aes.o bin
 	g++ -o bin/aes obj/aes.o obj/functions.o -L/usr/local/lib -L/data/extras/lib -L../../common -lcommon -lb64 -lcrypto -lcurl -lexpat -lmjson -lnsl -lpthread -lssl -ltar -lz
 obj/aes.o: aes.cpp obj ../../common/Makefile
 	g++ -g -Wall -c aes.cpp -o obj/aes.o -I/usr/local/include -I/usr/local/ssl/include -I/data/extras/include -I../../common;
+# }}}
+# {{{ bls
+bls: bin/bls
+	install --mode=775 bin/bls $(prefix)/servicejunction/service/
+bin/bls: ../../common/libcommon.a obj/functions.o obj/bls.o bin
+	g++ -o bin/bls obj/bls.o obj/functions.o -L/data/extras/lib -L../../common -lcommon -lb64 -lcrypto -lcurl -lexpat -lmjson -lnsl -lpthread -lssl -ltar -lz
+obj/bls.o: bls.cpp obj ../../common/Makefile
+	g++ -g -Wall -c bls.cpp -o obj/bls.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
 # }}}
 # {{{ central
 central: central.php functions.php
