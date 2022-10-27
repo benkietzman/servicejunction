@@ -41,6 +41,7 @@ install: bin/acorn bin/acronym bin/addrInfo bin/aes bin/bls central.php bin/curl
 	install --mode=664 soap.php $(prefix)/servicejunction/service/
 	install --mode=664 sysInfo.php $(prefix)/servicejunction/service/
 	install --mode=664 tcpdf.php $(prefix)/servicejunction/service/
+	install --mode=775 bin/teradata $(prefix)/servicejunction/service/
 	install --mode=775 bin/transmission $(prefix)/servicejunction/service/
 	install --mode=775 bin/warden $(prefix)/servicejunction/service/
 	install --mode=664 weather.php $(prefix)/servicejunction/service/
@@ -234,6 +235,14 @@ sysInfo: sysInfo.php functions.php
 # {{{ tcpdf
 tcpdf: tcpdf.php functions.php
 	install --mode=664 tcpdf.php $(prefix)/servicejunction/service/
+# }}}
+# {{{ teradata
+teradata: bin/teradata
+	install --mode=775 bin/teradata $(prefix)/servicejunction/service/
+bin/teradata: ../../common/libcommon.a obj/functions.o obj/teradata.o bin
+	g++ -o bin/teradata obj/teradata.o obj/functions.o -L/usr/lib64/teradata -L/data/extras/lib -L../../common -lcommon -lb64 -lcrypto -lcurl -lexpat -lmjson -lnsl -lodbc -lpthread -lssl -ltar -lz
+obj/teradata.o: teradata.cpp obj ../../common/Makefile
+	g++ -g -Wall -c teradata.cpp -o obj/teradata.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
 # }}}
 # {{{ transmission
 transmission: bin/transmission
