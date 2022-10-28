@@ -58,7 +58,14 @@ int main(int argc, char *argv[])
   loadRequest(requestArray, request);
   if (requestArray.find("Server") != requestArray.end() && !requestArray["Server"].empty())
   {
-    strServer = requestArray["Server"];
+    if (requestArray["Server"].find("//") != string::npos)
+    {
+      manip.getToken(strServer, requestArray["Server"], 3, "/", false);
+    }
+    else
+    {
+      strServer = requestArray["Server"];
+    }
   }
   else if (requestArray.find("URL") != requestArray.end() && !requestArray["URL"].empty())
   {
