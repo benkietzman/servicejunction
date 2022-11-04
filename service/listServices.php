@@ -27,11 +27,13 @@ if ($argc == 2)
 }
 if (($strContent = file_get_contents($strData.'/services.conf')) !== false)
 {
+  $requestArray['Status'] = 'okay';
   echo json_encode($requestArray)."\n";
   echo $strContent;
 }
 else
 {
+  $requestArray['Status'] = 'error';
   $requestArray['Error'] = 'Failed to read services configuration.';
   echo json_encode($requestArray)."\n";
 }
