@@ -11,7 +11,7 @@
 MAKE_UNAME=`uname -s`
 prefix=/usr/local
 all: bin/acorn bin/acronym bin/addrInfo bin/aes bin/bls bin/curl bin/format bin/google bin/jira bin/jwt bin/logger bin/mssql bin/mysql bin/password bin/pdf bin/ping bin/portConcentrator bin/samba bin/transmission bin/warden bin/zoneMinder
-install: bin/acorn bin/acronym bin/addrInfo bin/aes bin/bls central.php bin/curl email.php finance.php bin/format functions.php bin/google ircBot.php bin/jira bin/jwt listServices.php bin/logger bin/mssql bin/mysql bin/oracle oracle.php bin/password bin/pdf bin/ping bin/portConcentrator bin/samba soap.php sysInfo.php tcpdf.php bin/transmission bin/warden weather.php bin/zoneMinder
+install: bin/acorn bin/acronym bin/addrInfo bin/aes bin/bls central.php bin/curl email.php finance.php bin/format functions.php bin/google ircBot.php bin/jira bin/jwt listServices.php bin/logger bin/mssql bin/mysql bin/oracle bin/password bin/pdf bin/ping bin/portConcentrator bin/samba soap.php sysInfo.php tcpdf.php bin/transmission bin/warden weather.php bin/zoneMinder
 	install --mode=775 bin/acorn $(prefix)/servicejunction/service/
 	install --mode=775 bin/acronym $(prefix)/servicejunction/service/
 	install --mode=775 bin/addrInfo $(prefix)/servicejunction/service/
@@ -33,7 +33,6 @@ install: bin/acorn bin/acronym bin/addrInfo bin/aes bin/bls central.php bin/curl
 	install --mode=775 bin/mssql $(prefix)/servicejunction/service/
 	install --mode=775 bin/mysql $(prefix)/servicejunction/service/
 	install --mode=775 bin/oracle $(prefix)/servicejunction/service/
-	install --mode=664 oracle.php $(prefix)/servicejunction/service/
 	install --mode=775 bin/password $(prefix)/servicejunction/service/
 	install --mode=775 bin/pdf $(prefix)/servicejunction/service/
 	install --mode=775 bin/ping $(prefix)/servicejunction/service/
@@ -182,9 +181,8 @@ obj/mysql.o: mysql.cpp obj ../../common/Makefile
 	g++ -g -Wall -c mysql.cpp -o obj/mysql.o -I/usr/local/mysql/include -I/usr/local/ssl/include -I/data/extras/include -I../../common;
 # }}}
 # {{{ oracle
-oracle: bin/oracle oracle.php functions.php
+oracle: bin/oracle
 	install --mode=775 bin/oracle $(prefix)/servicejunction/service/
-	install --mode=664 oracle.php $(prefix)/servicejunction/service/
 bin/oracle: ../../common/libcommon.a obj/functions.o obj/oracle.o bin
 	g++ -o bin/oracle obj/oracle.o obj/functions.o -L/data/extras/lib -L../../common -lcommon -lb64 -lcrypto -lcurl -lexpat -lmjson -lnsl -lodbc -lpthread -lssl -ltar -lz
 obj/oracle.o: oracle.cpp obj ../../common/Makefile
