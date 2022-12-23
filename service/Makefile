@@ -11,7 +11,7 @@
 MAKE_UNAME=`uname -s`
 prefix=/usr/local
 all: bin/acorn bin/acronym bin/addrInfo bin/aes bin/bls bin/curl bin/format bin/google bin/jira bin/jwt bin/logger bin/mssql bin/mysql bin/password bin/pdf bin/ping bin/portConcentrator bin/samba bin/transmission bin/warden bin/zoneMinder
-install: bin/acorn bin/acronym bin/addrInfo bin/aes bin/bls central.php bin/curl email.php finance.php bin/format functions.php bin/google ircBot.php bin/jira bin/jwt listServices.php bin/logger bin/mssql bin/mysql oracle.php bin/password bin/pdf bin/ping bin/portConcentrator bin/samba soap.php sysInfo.php tcpdf.php bin/transmission bin/warden weather.php bin/zoneMinder
+install: bin/acorn bin/acronym bin/addrInfo bin/aes bin/bls central.php bin/curl email.php finance.php bin/format functions.php bin/google ircBot.php bin/jira bin/jwt listServices.php bin/logger bin/mssql bin/mysql bin/oracle oracle.php bin/password bin/pdf bin/ping bin/portConcentrator bin/samba soap.php sysInfo.php tcpdf.php bin/transmission bin/warden weather.php bin/zoneMinder
 	install --mode=775 bin/acorn $(prefix)/servicejunction/service/
 	install --mode=775 bin/acronym $(prefix)/servicejunction/service/
 	install --mode=775 bin/addrInfo $(prefix)/servicejunction/service/
@@ -186,7 +186,7 @@ oracle: bin/oracle oracle.php functions.php
 	install --mode=775 bin/oracle $(prefix)/servicejunction/service/
 	install --mode=664 oracle.php $(prefix)/servicejunction/service/
 bin/oracle: ../../common/libcommon.a obj/functions.o obj/oracle.o bin
-	g++ -o bin/oracle obj/oracle.o obj/functions.o -L/usr/local/oracle/instantclient -L/data/extras/lib -L../../common -lcommon -lb64 -lcrypto -lcurl -lexpat -lmjson -lnsl -lodbc -lpthread -lssl -ltar -lz
+	g++ -o bin/oracle obj/oracle.o obj/functions.o -L/data/extras/lib -L../../common -lcommon -lb64 -lcrypto -lcurl -lexpat -lmjson -lnsl -lodbc -lpthread -lssl -ltar -lz
 obj/oracle.o: oracle.cpp obj ../../common/Makefile
 	g++ -g -Wall -c oracle.cpp -o obj/oracle.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
 # }}}
@@ -246,7 +246,7 @@ tcpdf: tcpdf.php functions.php
 teradata: bin/teradata
 	install --mode=775 bin/teradata $(prefix)/servicejunction/service/
 bin/teradata: ../../common/libcommon.a obj/functions.o obj/teradata.o bin
-	g++ -o bin/teradata obj/teradata.o obj/functions.o -L/usr/lib64/teradata -L/data/extras/lib -L../../common -lcommon -lb64 -lcrypto -lcurl -lexpat -lmjson -lnsl -lodbc -lpthread -lssl -ltar -lz
+	g++ -o bin/teradata obj/teradata.o obj/functions.o -L/data/extras/lib -L../../common -lcommon -lb64 -lcrypto -lcurl -lexpat -lmjson -lnsl -lodbc -lpthread -lssl -ltar -lz
 obj/teradata.o: teradata.cpp obj ../../common/Makefile
 	g++ -g -Wall -c teradata.cpp -o obj/teradata.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
 # }}}
