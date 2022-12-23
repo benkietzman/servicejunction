@@ -32,6 +32,7 @@ install: bin/acorn bin/acronym bin/addrInfo bin/aes bin/bls central.php bin/curl
 	install --mode=775 bin/logger $(prefix)/servicejunction/service/
 	install --mode=775 bin/mssql $(prefix)/servicejunction/service/
 	install --mode=775 bin/mysql $(prefix)/servicejunction/service/
+	install --mode=775 bin/oracle $(prefix)/servicejunction/service/
 	install --mode=664 oracle.php $(prefix)/servicejunction/service/
 	install --mode=775 bin/password $(prefix)/servicejunction/service/
 	install --mode=775 bin/pdf $(prefix)/servicejunction/service/
@@ -181,8 +182,13 @@ obj/mysql.o: mysql.cpp obj ../../common/Makefile
 	g++ -g -Wall -c mysql.cpp -o obj/mysql.o -I/usr/local/mysql/include -I/usr/local/ssl/include -I/data/extras/include -I../../common;
 # }}}
 # {{{ oracle
-oracle: oracle.php functions.php
+oracle: bin/oracle oracle.php functions.php
+	install --mode=775 bin/oracle $(prefix)/servicejunction/service/
 	install --mode=664 oracle.php $(prefix)/servicejunction/service/
+bin/oracle: ../../common/libcommon.a obj/functions.o obj/oracle.o bin
+	g++ -o bin/oracle obj/oracle.o obj/functions.o -L/usr/local/oracle/instantclient -L/data/extras/lib -L../../common -lcommon -lb64 -lcrypto -lcurl -lexpat -lmjson -lnsl -lodbc -lpthread -lssl -ltar -lz
+obj/oracle.o: oracle.cpp obj ../../common/Makefile
+	g++ -g -Wall -c oracle.cpp -o obj/oracle.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
 # }}}
 # {{{ password
 password: bin/password

@@ -204,7 +204,7 @@ int main(int argc, char *argv[])
   }
   else if ((requestArray.find("Query") == requestArray.end() || requestArray["Query"].empty()) && (requestArray.find("Update") == requestArray.end() || requestArray["Update"].empty()))
   {
-    strError = "Please provide the MySQL Query or Update.";
+    strError = "Please provide the Query or Update.";
   }
   requestArray["Status"] = (string)((bProcessed)?"okay":"error");
   if (!strError.empty())
