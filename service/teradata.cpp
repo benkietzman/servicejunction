@@ -73,16 +73,16 @@ int main(int argc, char *argv[])
   }
   if (!strDriver.empty() && requestArray.find("User") != requestArray.end() && !requestArray["User"].empty() && requestArray.find("Password") != requestArray.end() && !requestArray["Password"].empty() && !strServer.empty() && ((requestArray.find("Query") != requestArray.end() && !requestArray["Query"].empty()) || (requestArray.find("Update") != requestArray.end() && !requestArray["Update"].empty())))
   {
-    stringstream ssConnection;
-    SQLCHAR outstr[1024];
-    SQLHDBC dbc;
     SQLHENV env;
-    SQLSMALLINT outstrlen;
     if (SQL_SUCCEEDED(SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &env)))
     {
+      SQLHDBC dbc;
       SQLSetEnvAttr(env, SQL_ATTR_ODBC_VERSION, (void *)SQL_OV_ODBC3, 0);
       if (SQL_SUCCEEDED(SQLAllocHandle(SQL_HANDLE_DBC, env, &dbc)))
       {
+        SQLCHAR outstr[1024];
+        SQLSMALLINT outstrlen;
+        stringstream ssConnection;
         ssConnection << "DRIVER=" << strDriver << ";DBCName=" << strServer << ";UID=" << requestArray["User"] << ";PWD=" << requestArray["Password"];
         if (SQL_SUCCEEDED(SQLDriverConnect(dbc, NULL, (SQLCHAR *)ssConnection.str().c_str(), SQL_NTS, outstr, sizeof(outstr), &outstrlen, SQL_DRIVER_COMPLETE)))
         {

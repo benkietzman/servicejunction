@@ -57,17 +57,17 @@ int main(int argc, char *argv[])
   loadRequest(requestArray, request);
   if (!strDriver.empty() && requestArray.find("Schema") != requestArray.end() && !requestArray["Schema"].empty() && requestArray.find("Password") != requestArray.end() && !requestArray["Password"].empty() && requestArray.find("tnsName") != requestArray.end() && !requestArray["tnsName"].empty() && ((requestArray.find("Query") != requestArray.end() && !requestArray["Query"].empty()) || (requestArray.find("Update") != requestArray.end() && !requestArray["Update"].empty())))
   {
-    stringstream ssConnection;
-    SQLCHAR outstr[1024];
-    SQLHDBC dbc;
     SQLHENV env;
-    SQLSMALLINT outstrlen;
     if (SQL_SUCCEEDED(SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &env)))
     {
+      SQLHDBC dbc;
       SQLSetEnvAttr(env, SQL_ATTR_ODBC_VERSION, (void *)SQL_OV_ODBC3, 0);
       if (SQL_SUCCEEDED(SQLAllocHandle(SQL_HANDLE_DBC, env, &dbc)))
       {
-        ssConnection << "DRIVER=" << strDriver << ";DBCName=" << requestArray["tnsName"] << ";UID=" << requestArray["Schema"] << ";PWD=" << requestArray["Password"];
+        SQLCHAR outstr[1024];
+        SQLSMALLINT outstrlen;
+        stringstream ssConnection;
+        ssConnection << "DRIVER=" << strDriver << ";ServerName=" << requestArray["tnsName"] << ";UID=" << requestArray["Schema"] << ";PWD=" << requestArray["Password"];
         if (SQL_SUCCEEDED(SQLDriverConnect(dbc, NULL, (SQLCHAR *)ssConnection.str().c_str(), SQL_NTS, outstr, sizeof(outstr), &outstrlen, SQL_DRIVER_COMPLETE)))
         {
           SQLHSTMT stmt;
