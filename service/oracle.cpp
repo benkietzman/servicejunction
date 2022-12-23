@@ -64,11 +64,7 @@ int main(int argc, char *argv[])
       SQLSetEnvAttr(env, SQL_ATTR_ODBC_VERSION, (void *)SQL_OV_ODBC3, 0);
       if (SQL_SUCCEEDED(SQLAllocHandle(SQL_HANDLE_DBC, env, &dbc)))
       {
-        SQLCHAR outstr[1024];
-        SQLSMALLINT outstrlen;
-        stringstream ssConnection;
-        ssConnection << "DRIVER=" << strDriver << ";ServerName=" << requestArray["tnsName"] << ";UID=" << requestArray["Schema"] << ";PWD=" << requestArray["Password"];
-        if (SQL_SUCCEEDED(SQLDriverConnect(dbc, NULL, (SQLCHAR *)ssConnection.str().c_str(), SQL_NTS, outstr, sizeof(outstr), &outstrlen, SQL_DRIVER_COMPLETE)))
+        if (SQL_SUCCEEDED(SQLConnect(dbc, (SQLCHAR *)requestArray["tnsName"].c_str(), requestArray["tnsName"].size(), (SQLCHAR *)requestArray["Schema"].c_str(), requestArray["Schema"].size(), (SQLCHAR *)requestArray["Password"].c_str(), requestArray["Password"].size())))
         {
           SQLHSTMT stmt;
           if (SQL_SUCCEEDED(SQLAllocHandle(SQL_HANDLE_STMT, dbc, &stmt)))
