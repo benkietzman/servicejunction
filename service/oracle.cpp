@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
                     strField = ssIndex.str();
                     if (SQL_SUCCEEDED(SQLDescribeCol(stmt, i, szField, 512, &nNameLength, &nDataType, &unColSize, &nDecDig, &nNull)))
                     {
-                      strField = (char *)szField;
+                      manip.toLower(strField, (char *)szField);
                     }
                     while (bGetting && ((nReturn = SQLGetData(stmt, i, SQL_C_CHAR, szBuffer, 512, &nIndicator)) == SQL_SUCCESS || nReturn == SQL_SUCCESS_WITH_INFO))
                     {
