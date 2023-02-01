@@ -72,7 +72,7 @@ using namespace common;
 /*! \def mUSAGE(A)
 * \brief Prints the usage statement.
 */
-#define mUSAGE(A) cout << endl << "Usage:  "<< A << " [options]"  << endl << endl << " -d, --daemon" << endl << "     Turns the process into a daemon." << endl << endl << "     --data" << endl << "     Sets the data directory." << endl << endl << " -e EMAIL, --email=EMAIL" << endl << "     Provides the email address for default notifications." << endl << endl << " -h, --help" << endl << "     Displays this usage screen." << endl << endl << "           --max-buffer=[MAX BUFFER]" << endl << "     Provides the maximum input buffer limit in MBs." << endl << endl << "           --max-lines=[MAX LINES]" << endl << "     Provides the maximum input lines limit." << endl << endl << "     --syslog" << endl << "     Enables syslog." << endl << endl << " -v, --version" << endl << "     Displays the current version of this software." << endl << endl
+#define mUSAGE(A) cout << endl << "Usage:  "<< A << " [options]"  << endl << endl << " -d, --daemon" << endl << "     Turns the process into a daemon." << endl << endl << "     --data" << endl << "     Sets the data directory." << endl << endl << " -e EMAIL, --email=EMAIL" << endl << "     Provides the email address for default notifications." << endl << endl << " -h, --help" << endl << "     Displays this usage screen." << endl << endl << "           --max-buffer=[MAX BUFFER]" << endl << "     Provides the maximum input buffer limit in MBs." << endl << endl << "           --max-lines=[MAX LINES]" << endl << "     Provides the maximum input lines limit." << endl << endl << " -v, --version" << endl << "     Displays the current version of this software." << endl << endl
 /*! \def mVER_USAGE(A,B)
 * \brief Prints the version number.
 */
@@ -147,7 +147,6 @@ static string gstrData = "/data/servicejunction"; //!< Global data path.
 static string gstrEmail; //!< Global notification email address.
 static string gstrWarden; //!< Global Warden unix socket path.
 static Central *gpCentral = NULL; //!< Contains the Central class.
-static Syslog *gpSyslog = NULL; //!< Contains the Syslog class.
 // }}}
 // {{{ prototypes
 /*! \fn void sighandle(const int nSignal)
@@ -224,10 +223,6 @@ int main(int argc, char *argv[])
       gpCentral->manip()->purgeChar(strMaxLines, strMaxLines, "\"");
       ssMaxLines.str(strMaxLines);
       ssMaxLines >> gunMaxLines;
-    }
-    else if (strArg == "--syslog")
-    {
-      gpSyslog = new Syslog(gstrApplication, "junction");
     }
     else if (strArg == "-v" || strArg == "--version")
     {
@@ -661,10 +656,6 @@ int main(int argc, char *argv[])
                                                   close(CHILD_READ);
                                                   dup2(CHILD_WRITE, 1);
                                                   close(CHILD_WRITE);
-                                                  if (gpSyslog != NULL)
-                                                  {
-                                                    gpSyslog->connectionStartedCommandLaunched(strCommand, "Accepted an incoming request.", fdData);
-                                                  }
                                                   execve(args[0], args, environ);
                                                   _exit(1);
                                                 }
@@ -974,10 +965,6 @@ int main(int argc, char *argv[])
     mUSAGE(argv[0]);
   }
   // }}}
-  if (gpSyslog != NULL)
-  {
-    delete gpSyslog;
-  }
   gpCentral->utility()->sslDeinit();
   delete gpCentral;
 
