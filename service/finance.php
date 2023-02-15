@@ -427,7 +427,7 @@ if (isset($requestArray['Function']) && $requestArray['Function'] != '' && ($req
             }
             else
             {
-              $strError = 'Encountered an unnkown error.  '.json_encode($data);
+              $strError = 'Encountered an unknown error.  '.json_encode($data);
             }
             unset($data);
           }
@@ -437,9 +437,39 @@ if (isset($requestArray['Function']) && $requestArray['Function'] != '' && ($req
           $strError = 'Failed to connect to the Alphavantage URL.';
         }
       }
+      else if (($strData = @file_get_contents('https://stooq.pl/q/l/?s='.$requestArray['Symbol'].'.US&f=sd2t2ohlcv&h&e=json')) !== false)
+      {
+        if (($data = json_decode($strData, true)) !== false)
+        {
+          if (isset($data['symbols']) && is_array($data['symbols']))
+          {
+            $bFound = false;
+            for ($i = 0; !$bFound && $i < sizeof($data['symbols']); $i++)
+            {
+              if (is_array($data['symbols'][$i]) && isset($data['symbols'][$i]['symbol']) && $data['symbols'][$i]['symbol'] == strtoupper($requestArray['Symbol']).'.US')
+              {
+                $response = array();
+                $bProcessed = true;
+                $response['Symbol'] = substr($data['symbols'][$i]['symbol'], 0, (strlen($data['symbols'][$i]['symbol']) - 3));
+                $response['Last'] = str_replace(',', '', $data['symbols'][$i]['close']);
+                $response['Date'] = $data['symbols'][$i]['date'];
+              }
+              else
+              {
+                $strError = 'Please provide a valid Symbol.';
+              }
+            }
+          }
+          else
+          {
+            $strError = 'Encountered an unknown error.  '.json_encode($data);
+          }
+          unset($data);
+        }
+      }
       else
       {
-        $strError = 'Please provide the Key.';
+        $strError = 'Failed to connect to the Stooq URL.';
       }
     }
     else
