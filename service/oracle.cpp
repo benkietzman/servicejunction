@@ -69,9 +69,10 @@ int main(int argc, char *argv[])
           SQLHSTMT stmt;
           if (SQL_SUCCEEDED(SQLAllocHandle(SQL_HANDLE_STMT, dbc, &stmt)))
           {
+            SQLRETURN nReturn;
             if (requestArray.find("Query") != requestArray.end() && !requestArray["Query"].empty())
             {
-              if (SQL_SUCCEEDED(SQLExecDirect(stmt, (SQLCHAR *)requestArray["Query"].c_str(), SQL_NTS)))
+              if (SQL_SUCCEEDED(nReturn = SQLExecDirect(stmt, (SQLCHAR *)requestArray["Query"].c_str(), SQL_NTS)) || nReturn == SQL_NO_DATA)
               {
                 SQLSMALLINT columns;
                 SQLNumResultCols(stmt, &columns);
@@ -86,7 +87,6 @@ int main(int argc, char *argv[])
                     stringstream ssIndex;
                     SQLCHAR szBuffer[512], szField[512];
                     SQLLEN nIndicator;
-                    SQLRETURN nReturn;
                     SQLSMALLINT nDataType, nDecDig, nNameLength, nNull;
                     SQLULEN unColSize;
                     ssIndex << i;
@@ -122,7 +122,6 @@ int main(int argc, char *argv[])
             }
             else if (requestArray.find("Update") != requestArray.end() && !requestArray["Update"].empty())
             {
-              SQLRETURN nReturn;
               if (SQL_SUCCEEDED(nReturn = SQLExecDirect(stmt, (SQLCHAR *)requestArray["Update"].c_str(), SQL_NTS)) || nReturn == SQL_NO_DATA)
               {
                 bProcessed = true;
