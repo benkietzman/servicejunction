@@ -122,7 +122,8 @@ int main(int argc, char *argv[])
             }
             else if (requestArray.find("Update") != requestArray.end() && !requestArray["Update"].empty())
             {
-              if (SQL_SUCCEEDED(SQLExecDirect(stmt, (SQLCHAR *)requestArray["Update"].c_str(), SQL_NTS)))
+              SQLRETURN nReturn;
+              if (SQL_SUCCEEDED(nReturn = SQLExecDirect(stmt, (SQLCHAR *)requestArray["Update"].c_str(), SQL_NTS)) || nReturn == SQL_NO_DATA)
               {
                 bProcessed = true;
               }
