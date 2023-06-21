@@ -144,10 +144,17 @@ int main(int argc, char *argv[])
                 delete ptJson;
                 strBuffers[1].append("\n");
               }
-              request.pop_front();
-              for (auto &i : request)
+              else if ((ssl = utility.sslConnect(ctx, fdSocket, strError)) == NULL)
               {
-                strBuffers[2].append(i + "\n");
+                bExit = true;
+                ssMessage.str("");
+                ssMessage << "utility::sslConnect() " << strError;
+                strError = ssMessage.str();
+              }
+              request.pop_front();
+              for (auto &j : request)
+              {
+                strBuffers[2].append(j + "\n");
               }
               strBuffers[2].append("end\n");
               while (!bExit)
