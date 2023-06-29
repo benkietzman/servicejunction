@@ -138,7 +138,7 @@ int main(int argc, char *argv[])
                   if (getAccountRow["encrypt"] == "1")
                   {
                     ssQuery.str("");
-                    ssQuery << "select id from application_account where id = " << getAccountRow["id"] << " and `password` = concat('*',upper(sha1(unhex(sha1('" << escape(requestArray["Password"], strValue) << "')))))";
+                    ssQuery << "select id from application_account where id = " << getAccountRow["id"] << " and (`password` = concat('*',upper(sha1(unhex(sha1('" << escape(requestArray["Password"], strValue) << "'))))) or `password` = concat('!',upper(sha2(unhex(sha2('" << escape(requestArray["Password"], strValue) << "', 512)), 512))))";
                     if (mysql_query(conn, ssQuery.str().c_str()) == 0)
                     {
                       MYSQL_RES *subresult = mysql_store_result(conn);
@@ -183,7 +183,7 @@ int main(int argc, char *argv[])
                       ssQuery << "update application_account set `password` = ";
                       if (getAccountRow["encrypt"] == "1")
                       {
-                        ssQuery << "concat('*',upper(sha1(unhex(sha1('" << escape(requestArray["NewPassword"], strValue) << "')))))";
+                        ssQuery << "concat('!',upper(sha2(unhex(sha2('" << escape(requestArray["NewPassword"], strValue) << "', 512)), 512)))";
                       }
                       else if (ptConf->m.find("Aes") != ptConf->m.end() && !ptConf->m["Aes"]->v.empty())
                       {
