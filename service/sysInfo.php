@@ -24,6 +24,10 @@ $extras = null;
 $request = null;
 $strError = null;
 loadRequest($requestArray, $request);
+if ($argc == 2)
+{
+  $requestArray['sysInfoServer'] = $argv[1];
+}
 if (!isset($requestArray['sysInfoPort']) || $requestArray['sysInfoPort'] == '')
 {
   $requestArray['sysInfoPort'] = '4636';
