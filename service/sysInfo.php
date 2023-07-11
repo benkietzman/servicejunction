@@ -100,7 +100,10 @@ if (isset($requestArray['sysInfoServer']) && $requestArray['sysInfoServer'] != '
                 for ($i = 0; $i < $unSize; $i++)
                 {
                   $item = explode('(', $ownerArray[$i]);
-                  $responseArray['Owners'][$item[0]] = str_replace(')', '', $item[1]);
+                  if (sizeof($item) >= 2)
+                  {
+                    $responseArray['Owners'][$item[0]] = str_replace(')', '', $item[1]);
+                  }
                   unset($item);
                 }
                 unset($ownerArray);
