@@ -24,11 +24,11 @@ $extras = null;
 $request = null;
 $strError = null;
 loadRequest($requestArray, $request);
-if ($argc >= 2 && (!isset($requestArray['sysInfoServer'] || $requestArray['sysInfoServer'] == ''))
+if ($argc >= 2 && (!isset($requestArray['sysInfoServer']) || $requestArray['sysInfoServer'] == ''))
 {
   $requestArray['sysInfoServer'] = $argv[1];
 }
-if ($argc >= 3 && (!isset($requestArray['sysInfoPort'] || $requestArray['sysInfoPort'] == ''))
+if ($argc >= 3 && (!isset($requestArray['sysInfoPort']) || $requestArray['sysInfoPort'] == ''))
 {
   $requestArray['sysInfoPort'] = $argv[2];
 }
