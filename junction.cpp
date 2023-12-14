@@ -130,8 +130,9 @@ struct connection
   pid_t childPid;
   string strBuffer[2];
   string strCommand;
-  time_t CStartTime;
-  time_t CEndTime;
+  time_t CStart;
+  time_t CEnd;
+  time_t CTerm;
   time_t CTimeout;
   Json *ptRequest;
 };
@@ -618,9 +619,9 @@ int main(int argc, char *argv[])
                                             pid_t childPid;
                                             string strArgument;
                                             stringstream ssCommand, ssMessage;
-                                            time_t CStartTime = 0, CEndTime = 0, CTimeout = CHILD_TIMEOUT;
+                                            time_t CStart = 0, CEnd = 0, CTimeout = CHILD_TIMEOUT;
                                             unsigned int unIndex = 0;
-                                            time(&CStartTime);
+                                            time(&CStart);
                                             if (ptRequest->m.find("Timeout") != ptRequest->m.end() && !ptRequest->m["Timeout"]->v.empty())
                                             {
                                               bool bNumeric = true;
@@ -669,8 +670,9 @@ int main(int argc, char *argv[])
                                                   ptConnection->writepipe = PARENT_WRITE;
                                                   ptConnection->ptRequest = new Json(ptRequest);
                                                   ptConnection->childPid = childPid;
-                                                  ptConnection->CStartTime = CStartTime;
-                                                  ptConnection->CEndTime = CEndTime;
+                                                  ptConnection->CStart = CStart;
+                                                  ptConnection->CEnd = CEnd;
+                                                  ptConnection->CTerm = 0;
                                                   ptConnection->CTimeout = CTimeout;
                                                   ptConnection->strCommand = strCommand;
                                                   if (pWarden != NULL && ptWarden->m.find(ptRequest->m["Service"]->v) != ptWarden->m.end())
@@ -811,12 +813,20 @@ int main(int argc, char *argv[])
                                 }
                               }
                               // }}}
-                              time(&((*i)->CEndTime));
-                              if (((*i)->CEndTime - (*i)->CStartTime) > (*i)->CTimeout)
+                              time(&((*i)->CEnd));
+                              if (((*i)->CEnd - (*i)->CStart) > (*i)->CTimeout)
                               {
-                                bDone = true;
-                                strError = "Request timed out.";
-                                kill((*i)->childPid, SIGTERM);
+                                if ((*i)->CTerm == 0)
+                                {
+                                  kill((*i)->childPid, SIGTERM);
+                                  (*i)->CTerm = (*i)->CEnd;
+                                }
+                                else if (((*i)->CEnd - (*i)->CTerm) > 10)
+                                {
+                                  bDone = true;
+                                  strError = "Request timed out.";
+                                  kill((*i)->childPid, SIGKILL);
+                                }
                               }
                               if (bDone)
                               {
@@ -845,7 +855,7 @@ int main(int argc, char *argv[])
                                     strBuffer[1].append(strLine+"\n");
                                   }
                                 }
-                                ssMessage << "[Service:" << (*i)->ptRequest->m["Service"]->v << ",Port:" << (string)((bConcentrator)?"concentrator":((bStandard)?"standard":"secure")) << ",IP:" << szIP << ",Duration:" << ((*i)->CEndTime - (*i)->CStartTime) << "]  ";
+                                ssMessage << "[Service:" << (*i)->ptRequest->m["Service"]->v << ",Port:" << (string)((bConcentrator)?"concentrator":((bStandard)?"standard":"secure")) << ",IP:" << szIP << ",Duration:" << ((*i)->CEnd - (*i)->CStart) << "]  ";
                                 if (!strError.empty())
                                 {
                                   (*i)->ptRequest->insert("Error", strError);
