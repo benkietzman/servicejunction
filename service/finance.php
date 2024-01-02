@@ -170,6 +170,42 @@ if (isset($requestArray['Function']) && $requestArray['Function'] != '' && ($req
         }
         unset($nPosition);
       }
+      else if ($requestArray['Symbol'] == 'gold' || $requestArray['Symbol'] == 'silver')
+      {
+        $strUrl = 'https://data-asg.goldprice.org/dbXRates/USD';
+        if (fetchPage($strUrl, null, null, $strHeader, $strContent, $strError))
+        {
+          $data = json_decode($strContent, true);
+          $response = array();
+          $response['TimeStamp'] = $data['ts'];
+          $response['Date'] = $data['date'];
+          if (isset($data['items']) && sizeof($data['items']) > 0)
+          {
+            $bProcessed = true;
+            $item = $data['items'][0];
+            if ($requestArray['Symbol'] == 'gold')
+            {
+              $response['Ask'] = $response['Bid'] = $response['Price'] = $item['xauPrice'];
+              $response['Change'] = $item['chgXau'];
+              $response['Close'] = $item['xauClose'];
+              $response['PercentageChange'] = $item['pcXau'];
+            }
+            else
+            {
+              $response['Ask'] = $response['Bid'] = $response['Price'] = $item['xagPrice'];
+              $response['Change'] = $item['chgXag'];
+              $response['Close'] = $item['xagClose'];
+              $response['PercentageChange'] = $item['pcXag'];
+            }
+            unset($item);
+          }
+          else
+          {
+            $strError = 'Failed to locate items.';
+          }
+          unset($data);
+        }
+      }
     }
     else
     {
