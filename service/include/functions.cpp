@@ -72,7 +72,6 @@ bool fetchPage(string &strUrl, const string strType, map<string, string> auth, c
   chunk.memory = NULL;
   chunk.size = 0;
   curl_easy_setopt(ch, CURLOPT_ERRORBUFFER, szError);
-  curl_easy_setopt(ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
   if (!strUserAgent.empty())
   {
     if (strUserAgent != "none")
