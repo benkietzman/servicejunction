@@ -11,7 +11,7 @@
 MAKE_UNAME=`uname -s`
 prefix=/usr/local
 all: bin/acorn bin/acronym bin/addrInfo bin/aes bin/bls bin/curl bin/format bin/google bin/jira bin/jwt bin/logger bin/mssql bin/mysql bin/password bin/pdf bin/ping bin/portConcentrator bin/samba bin/transmission bin/warden bin/zoneMinder
-install: bin/acorn bin/acronym bin/addrInfo bin/aes bin/bls central.php bin/curl email.php finance.php bin/format functions.php bin/google ircBot.php bin/jira bin/jwt listServices.php bin/logger bin/mssql bin/mysql bin/oracle bin/password bin/pdf bin/ping bin/portConcentrator bin/samba soap.php sysInfo.php tcpdf.php bin/transmission bin/warden weather.php bin/zoneMinder
+install: bin/acorn bin/acronym bin/addrInfo bin/aes bin/bls central.php bin/curl email.php bin/format functions.php bin/google ircBot.php bin/jira bin/jwt listServices.php bin/logger bin/mssql bin/mysql bin/oracle bin/password bin/pdf bin/ping bin/portConcentrator bin/samba soap.php sysInfo.php tcpdf.php bin/transmission bin/warden weather.php bin/zoneMinder
 	install --mode=775 bin/acorn $(prefix)/servicejunction/service/
 	install --mode=775 bin/acronym $(prefix)/servicejunction/service/
 	install --mode=775 bin/addrInfo $(prefix)/servicejunction/service/
@@ -20,7 +20,6 @@ install: bin/acorn bin/acronym bin/addrInfo bin/aes bin/bls central.php bin/curl
 	install --mode=664 central.php $(prefix)/servicejunction/service/
 	install --mode=775 bin/curl $(prefix)/servicejunction/service/
 	install --mode=664 email.php $(prefix)/servicejunction/service/
-	install --mode=664 finance.php $(prefix)/servicejunction/service/
 	install --mode=775 bin/format $(prefix)/servicejunction/service/
 	install --mode=664 functions.php $(prefix)/servicejunction/service/
 	install --mode=775 bin/google $(prefix)/servicejunction/service/
@@ -103,10 +102,6 @@ obj/curl.o: curl.cpp obj ../../common/Makefile
 # {{{ email
 email: email.php functions.php
 	install --mode=664 email.php $(prefix)/servicejunction/service/
-# }}}
-# {{{ finance
-finance: finance.php functions.php
-	install --mode=664 finance.php $(prefix)/servicejunction/service/
 # }}}
 # {{{ format
 format: bin/format
