@@ -92,16 +92,23 @@ int main(int argc, char *argv[])
               // {{{ directoryExist
               if (ptJson->m["Function"]->v == "directoryExist")
               {
-                if (strPath.empty() || samba.directoryExist(strPath, strError))
+                if (strPath.empty())
                 {
-                  bProcessed = true;
+                  if (samba.directoryExist(strPath, strError))
+                  {
+                    bProcessed = true;
+                  }
+                }
+                else
+                {
+                  strError = "Please provide the Path.";
                 }
               }
               // }}}
               // {{{ directoryList
               else if (ptJson->m["Function"]->v == "directoryList")
               {
-                list<string> items
+                list<string> items;
                 if (samba.directoryList(strPath, items, strError))
                 {
                   bProcessed = true;
