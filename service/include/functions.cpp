@@ -173,7 +173,15 @@ bool fetchPage(string &strUrl, const string strType, map<string, string> auth, c
   }
   if (!strProxy.empty())
   {
-    curl_easy_setopt(ch, CURLOPT_PROXY, strProxy.c_str());
+    string strProxyUrl, strProxyUserPassword;
+    stringstream ssProxy(strProxy);
+    getline(ssProxy, strProxyUrl);
+    curl_easy_setopt(ch, CURLOPT_PROXY, strProxyUrl.c_str());
+    getline(ssProxy, strProxyUserPassword);
+    if (!strProxyUserPassword.empty())
+    {
+      curl_easy_setopt(ch, CURLOPT_PROXYUSERPWD, strProxyUserPassword.c_str());
+    }
   }
   while (bRedirect && unAttempt[0]++ < 5)
   {
