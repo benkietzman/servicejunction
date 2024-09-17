@@ -12,7 +12,7 @@ all: bin/junction
 
 bin/junction: ../common/libcommon.a obj/junction.o
 	-if [ ! -d bin ]; then mkdir bin; fi;
-	g++ -o bin/junction obj/junction.o -L/data/extras/lib -L../common -lcommon -lb64 -lcrypto -lexpat -lmjson -lnsl -lpthread -lrt -lssl -ltar -lz
+	g++ -o bin/junction obj/junction.o -L/data/extras/lib -L../common -lcommon -lb64 -lcrypto -lexpat -lmjson -lpthread -lrt -lssl -ltar -lz
 
 ../common/libcommon.a: ../common/Makefile
 	cd ../common; ./configure; make;
