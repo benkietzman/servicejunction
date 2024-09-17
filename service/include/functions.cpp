@@ -151,7 +151,7 @@ bool fetchPage(string &strUrl, const string strType, map<string, string> auth, c
     }
     else
     {
-      curl_easy_setopt(ch, CURLOPT_PUT, true);
+      curl_easy_setopt(ch, CURLOPT_UPLOAD, true);
     }
     curl_easy_setopt(ch, CURLOPT_POSTFIELDS, strPut.c_str());
   }
