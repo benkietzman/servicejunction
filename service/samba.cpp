@@ -201,7 +201,7 @@ int main(int argc, char *argv[])
                 {
                   strFile = ptRequest->m["File"]->v;
                 }
-                if (samba.fileExist(strFile, strError) || strError = "Not found.")
+                if (samba.fileExist(strFile, strError) || strError == "Not found.")
                 {
                   bProcessed = true;
                 }
