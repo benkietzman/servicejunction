@@ -196,19 +196,12 @@ int main(int argc, char *argv[])
               // {{{ login
               else if (ptJson->m["Function"]->v == "login")
               {
-                string strDirectory, strFile = "DOSVER.COM";
+                string strFile = "DOSVER.COM";
                 if (ptRequest->m.find("File") != ptRequest->m.end() && !ptRequest->m["File"]->v.empty())
                 {
                   strFile = ptRequest->m["File"]->v;
                 }
-                if (!strDirectory.empty())
-                {
-                  if (samba.directoryExist(strDirectory, strError))
-                  {
-                    bProcessed = true;
-                  }
-                }
-                else if (samba.fileExist(strFile, strError))
+                if (samba.fileExist(strFile, strError) || strError = "Not found.")
                 {
                   bProcessed = true;
                 }
