@@ -30,6 +30,7 @@ if (isset($requestArray['To']) && $requestArray['To'] != '')
   if (isset($requestArray['From']) && $requestArray['From'] != '')
   {
     $header['From'] = $requestArray['From'];
+    $header['Reply-To'] = $requestArray['From'];
   }
   if (isset($requestArray['CC']) && $requestArray['CC'] != '')
   {
