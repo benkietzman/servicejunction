@@ -32,7 +32,6 @@
 #include <sys/types.h>
 #include <vector>
 using namespace std;
-#include <Bridge>
 #include <Json>
 using namespace common;
 #include "include/functions"
