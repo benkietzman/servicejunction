@@ -233,6 +233,20 @@ int main(int argc, char *argv[])
                       }
                     }
                   }
+                  if (fds[0].revents & POLLERR)
+                  {
+                    bExit = true;
+                    ssMessage.str("");
+                    ssMessage << "poll() Encountered a POLLERR.";
+                    strError = ssMessage.str();
+                  }
+                  if (fds[0].revents & POLLNVAL)
+                  {
+                    bExit = true;
+                    ssMessage.str("");
+                    ssMessage << "poll() Encountered a POLLNVAL.";
+                    strError = ssMessage.str();
+                  }
                 }
                 else if (nReturn < 0)
                 {
