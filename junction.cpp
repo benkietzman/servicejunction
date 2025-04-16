@@ -844,11 +844,13 @@ int main(int argc, char *argv[])
                               {
                                 if ((*i)->CTerm == 0)
                                 {
+                                  gpCentral->log("Sent SIGTERM.");
                                   kill((*i)->childPid, SIGTERM);
                                   (*i)->CTerm = (*i)->CEnd;
                                 }
                                 else if (((*i)->CEnd - (*i)->CTerm) > 10)
                                 {
+                                  gpCentral->log("Sent SIGKILL.");
                                   bDone = true;
                                   strError = "Request timed out.";
                                   kill((*i)->childPid, SIGKILL);
