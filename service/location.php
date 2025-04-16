@@ -16,14 +16,6 @@
 *                                                                         *
 **************************************************************************/
 
-if (file_exists('/web/html/nusoap/nusoap.php'))
-{
-  require('/web/html/nusoap/nusoap.php');
-}
-else
-{
-  require('/web/html/nusoap/lib/nusoap.php');
-}
 require('functions.php');
 $bProcessed = false;
 $requestArray = null;
@@ -37,20 +29,15 @@ if (isset($requestArray['State']) && $requestArray['State'] != '')
   {
     if (isset($requestArray['Address']) && $requestArray['Address'] != '')
     {
-      $strTimeout = '120';
-      if (isset($requestArray['Timeout']) && $requestArray['Timeout'] != '')
+      try
       {
-        $strTimeout = $requestArray['Timeout'];
+        $client = new SoapClient('http://geocoder.us/dist/eg/clients/GeoCoderPHP.wsdl', []);
+        $response = $client->geocode(array($requestArray['Address'].', '.$requestArray['City'].', '.$requestArray['State']));
+        $bProcessed = true;
       }
-      $client = new nusoap_client('http://geocoder.us/dist/eg/clients/GeoCoderPHP.wsdl', 'wsdl', true, false, false, false, $strTimeout, $strTimeout);
-      if (($strError = $client->getError()) == '')
+      catch (Exception $e)
       {
-        $client->soap_defencoding = 'UTF-8';
-        $response = $client->call('geocode', array($requestArray['Address'].', '.$requestArray['City'].', '.$requestArray['State']));
-        if (($strError = $client->getError()) == '')
-        {
-          $bProcessed = true;
-        }
+        $strError = $e->getMessage();
       }
     }
     else
