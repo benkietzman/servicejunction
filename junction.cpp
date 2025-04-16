@@ -125,6 +125,7 @@ using namespace common;
 // {{{ structs
 struct connection
 {
+  bool bDone;
   int readpipe;
   int writepipe;
   pid_t childPid;
@@ -495,6 +496,7 @@ int main(int argc, char *argv[])
                     if (bStandard || SSL_accept(ssl) == 1)
                     {
                       bool bExit = false;
+                      list<list<connection *>::iterator> removeList;
                       list<string> buffer;
                       list<connection *> queue;
                       pollfd *fds;
@@ -526,7 +528,6 @@ int main(int argc, char *argv[])
                         }
                         if ((nReturn = poll(fds, unfdSize, 2000)) > 0)
                         {
-                          list<list<connection *>::iterator> removeList;
                           // {{{ read
                           if (fds[0].revents & (POLLIN | POLLHUP))
                           {
@@ -661,6 +662,7 @@ int main(int argc, char *argv[])
                                               string strLine;
                                               close(CHILD_READ);
                                               close(CHILD_WRITE);
+                                              ptConnection->bDone = false;
                                               ptConnection->readpipe = PARENT_READ;
                                               ptConnection->writepipe = PARENT_WRITE;
                                               ptConnection->ptRequest = new Json(ptRequest);
@@ -769,7 +771,6 @@ int main(int argc, char *argv[])
                           // {{{ service pipes
                           for (auto i = queue.begin(); i != queue.end(); i++)
                           {
-                            bool bDone = false;
                             string strError;
                             for (size_t unfdIndex = 1; unfdIndex < unfdSize; unfdIndex++)
                             {
@@ -786,7 +787,7 @@ int main(int argc, char *argv[])
                                   }
                                   else
                                   {
-                                    bDone = true;
+                                    (*i)->bDone = true;
                                     if (nSubReturn < 0)
                                     {
                                       stringstream ssError;
@@ -797,12 +798,12 @@ int main(int argc, char *argv[])
                                 }
                                 if (fds[unfdIndex].revents & POLLERR)
                                 {
-                                  bDone = true;
+                                  (*i)->bDone = true;
                                   strError = "poll() Encountered a POLLERR.";
                                 }
                                 if (fds[unfdIndex].revents & POLLNVAL)
                                 {
-                                  bDone = true;
+                                  (*i)->bDone = true;
                                   strError = "poll() Encountered a POLLNVAL.";
                                 }
                               }
@@ -819,7 +820,7 @@ int main(int argc, char *argv[])
                                   }
                                   else
                                   {
-                                    bDone = true;
+                                    (*i)->bDone = true;
                                     if (nSubReturn < 0)
                                     {
                                       stringstream ssError;
@@ -830,75 +831,16 @@ int main(int argc, char *argv[])
                                 }
                                 if (fds[unfdIndex].revents & POLLERR)
                                 {
-                                  bDone = true;
+                                  (*i)->bDone = true;
                                   strError = "poll() Encountered a POLLERR.";
                                 }
                                 if (fds[unfdIndex].revents & POLLNVAL)
                                 {
-                                  bDone = true;
+                                  (*i)->bDone = true;
                                   strError = "poll() Encountered a POLLNVAL.";
                                 }
                               }
                               // }}}
-                            }
-                            time(&((*i)->CEnd));
-                            if (((*i)->CEnd - (*i)->CStart) > (*i)->CTimeout)
-                            {
-                              if ((*i)->CTerm == 0)
-                              {
-                                gpCentral->log("Sent SIGTERM.");
-                                kill((*i)->childPid, SIGTERM);
-                                (*i)->CTerm = (*i)->CEnd;
-                              }
-                              else if (((*i)->CEnd - (*i)->CTerm) > 10)
-                              {
-                                gpCentral->log("Sent SIGKILL.");
-                                bDone = true;
-                                strError = "Request timed out.";
-                                kill((*i)->childPid, SIGKILL);
-                              }
-                            }
-                            if (bDone)
-                            {
-                              bool bFirst = true;
-                              string strLine;
-                              stringstream ssBuffer((*i)->strBuffer[0] + "end\n"), ssMessage;
-                              close((*i)->readpipe);
-                              close((*i)->writepipe);
-                              (*i)->strBuffer[0].clear();
-                              while (getline(ssBuffer, strLine))
-                              {
-                                if (bFirst)
-                                {
-                                  Json *ptVault = new Json(strLine);
-                                  bFirst = false;
-                                  if (ptVault->m.find("_vault") != ptVault->m.end())
-                                  {
-                                    delete ptVault->m["_vault"];
-                                    ptVault->m.erase("_vault");
-                                  }
-                                  strBuffer[1].append(ptVault->j(strLine)+"\n");
-                                  delete ptVault;
-                                }
-                                else
-                                {
-                                  strBuffer[1].append(strLine+"\n");
-                                }
-                              }
-                              ssMessage << "[Service:" << (*i)->ptRequest->m["Service"]->v << ",Port:" << (string)((bConcentrator)?"concentrator":((bStandard)?"standard":"secure")) << ",IP:" << szIP << ",Duration:" << ((*i)->CEnd - (*i)->CStart) << "]  ";
-                              if (!strError.empty())
-                              {
-                                (*i)->ptRequest->insert("Error", strError);
-                              }
-                              if ((*i)->ptRequest->m.find("Password") != (*i)->ptRequest->m.end())
-                              {
-                                (*i)->ptRequest->insert("Password", "******");
-                              }
-                              ssMessage << (*i)->ptRequest;
-                              gpCentral->log(ssMessage.str());
-                              delete (*i)->ptRequest;
-                              delete *i;
-                              removeList.push_back(i);
                             }
                           }
                           for (auto &i : removeList)
@@ -914,6 +856,76 @@ int main(int argc, char *argv[])
                           gpCentral->log((string)"poll() error: " + strerror(errno));
                         }
                         delete[] fds;
+                        // {{{ service pipes
+                        for (auto i = queue.begin(); i != queue.end(); i++)
+                        {
+                          string strError;
+                          time(&((*i)->CEnd));
+                          if (((*i)->CEnd - (*i)->CStart) > (*i)->CTimeout)
+                          {
+                            if ((*i)->CTerm == 0)
+                            {
+                              gpCentral->log("Sent SIGTERM.");
+                              kill((*i)->childPid, SIGTERM);
+                              (*i)->CTerm = (*i)->CEnd;
+                            }
+                            else if (((*i)->CEnd - (*i)->CTerm) > 10)
+                            {
+                              gpCentral->log("Sent SIGKILL.");
+                              (*i)->bDone = true;
+                              strError = "Request timed out.";
+                              kill((*i)->childPid, SIGKILL);
+                            }
+                          }
+                          if ((*i)->bDone)
+                          {
+                            bool bFirst = true;
+                            string strLine;
+                            stringstream ssBuffer((*i)->strBuffer[0] + "end\n"), ssMessage;
+                            close((*i)->readpipe);
+                            close((*i)->writepipe);
+                            (*i)->strBuffer[0].clear();
+                            while (getline(ssBuffer, strLine))
+                            {
+                              if (bFirst)
+                              {
+                                Json *ptVault = new Json(strLine);
+                                bFirst = false;
+                                if (ptVault->m.find("_vault") != ptVault->m.end())
+                                {
+                                  delete ptVault->m["_vault"];
+                                  ptVault->m.erase("_vault");
+                                }
+                                strBuffer[1].append(ptVault->j(strLine)+"\n");
+                                delete ptVault;
+                              }
+                              else
+                              {
+                                strBuffer[1].append(strLine+"\n");
+                              }
+                            }
+                            ssMessage << "[Service:" << (*i)->ptRequest->m["Service"]->v << ",Port:" << (string)((bConcentrator)?"concentrator":((bStandard)?"standard":"secure")) << ",IP:" << szIP << ",Duration:" << ((*i)->CEnd - (*i)->CStart) << "]  ";
+                            if (!strError.empty())
+                            {
+                              (*i)->ptRequest->insert("Error", strError);
+                            }
+                            if ((*i)->ptRequest->m.find("Password") != (*i)->ptRequest->m.end())
+                            {
+                              (*i)->ptRequest->insert("Password", "******");
+                            }
+                            ssMessage << (*i)->ptRequest;
+                            gpCentral->log(ssMessage.str());
+                            delete (*i)->ptRequest;
+                            delete *i;
+                            removeList.push_back(i);
+                          }
+                        }
+                        for (auto &i : removeList)
+                        {
+                          queue.erase(i);
+                        }
+                        removeList.clear();
+                        // }}}
                       }
                       for (auto &i : queue)
                       {
