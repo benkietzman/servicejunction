@@ -900,13 +900,13 @@ int main(int argc, char *argv[])
                                 removeList.push_back(i);
                               }
                             }
-                            // }}}
-                            for (auto &i : removeList)
-                            {
-                              queue.erase(i);
-                            }
-                            removeList.clear();
                           }
+                          for (auto &i : removeList)
+                          {
+                            queue.erase(i);
+                          }
+                          removeList.clear();
+                          // }}}
                         }
                         else if (nReturn < 0)
                         {
