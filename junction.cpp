@@ -769,10 +769,10 @@ int main(int argc, char *argv[])
                           // {{{ service pipes
                           for (auto i = queue.begin(); i != queue.end(); i++)
                           {
+                            bool bDone = false;
+                            string strError;
                             for (size_t unfdIndex = 1; unfdIndex < unfdSize; unfdIndex++)
                             {
-                              bool bDone = false;
-                              string strError;
                               // {{{ read
                               if (fds[unfdIndex].fd == (*i)->readpipe)
                               {
@@ -840,65 +840,65 @@ int main(int argc, char *argv[])
                                 }
                               }
                               // }}}
-                              time(&((*i)->CEnd));
-                              if (((*i)->CEnd - (*i)->CStart) > (*i)->CTimeout)
+                            }
+                            time(&((*i)->CEnd));
+                            if (((*i)->CEnd - (*i)->CStart) > (*i)->CTimeout)
+                            {
+                              if ((*i)->CTerm == 0)
                               {
-                                if ((*i)->CTerm == 0)
+                                gpCentral->log("Sent SIGTERM.");
+                                kill((*i)->childPid, SIGTERM);
+                                (*i)->CTerm = (*i)->CEnd;
+                              }
+                              else if (((*i)->CEnd - (*i)->CTerm) > 10)
+                              {
+                                gpCentral->log("Sent SIGKILL.");
+                                bDone = true;
+                                strError = "Request timed out.";
+                                kill((*i)->childPid, SIGKILL);
+                              }
+                            }
+                            if (bDone)
+                            {
+                              bool bFirst = true;
+                              string strLine;
+                              stringstream ssBuffer((*i)->strBuffer[0] + "end\n"), ssMessage;
+                              close((*i)->readpipe);
+                              close((*i)->writepipe);
+                              (*i)->strBuffer[0].clear();
+                              while (getline(ssBuffer, strLine))
+                              {
+                                if (bFirst)
                                 {
-                                  gpCentral->log("Sent SIGTERM.");
-                                  kill((*i)->childPid, SIGTERM);
-                                  (*i)->CTerm = (*i)->CEnd;
+                                  Json *ptVault = new Json(strLine);
+                                  bFirst = false;
+                                  if (ptVault->m.find("_vault") != ptVault->m.end())
+                                  {
+                                    delete ptVault->m["_vault"];
+                                    ptVault->m.erase("_vault");
+                                  }
+                                  strBuffer[1].append(ptVault->j(strLine)+"\n");
+                                  delete ptVault;
                                 }
-                                else if (((*i)->CEnd - (*i)->CTerm) > 10)
+                                else
                                 {
-                                  gpCentral->log("Sent SIGKILL.");
-                                  bDone = true;
-                                  strError = "Request timed out.";
-                                  kill((*i)->childPid, SIGKILL);
+                                  strBuffer[1].append(strLine+"\n");
                                 }
                               }
-                              if (bDone)
+                              ssMessage << "[Service:" << (*i)->ptRequest->m["Service"]->v << ",Port:" << (string)((bConcentrator)?"concentrator":((bStandard)?"standard":"secure")) << ",IP:" << szIP << ",Duration:" << ((*i)->CEnd - (*i)->CStart) << "]  ";
+                              if (!strError.empty())
                               {
-                                bool bFirst = true;
-                                string strLine;
-                                stringstream ssBuffer((*i)->strBuffer[0] + "end\n"), ssMessage;
-                                close((*i)->readpipe);
-                                close((*i)->writepipe);
-                                (*i)->strBuffer[0].clear();
-                                while (getline(ssBuffer, strLine))
-                                {
-                                  if (bFirst)
-                                  {
-                                    Json *ptVault = new Json(strLine);
-                                    bFirst = false;
-                                    if (ptVault->m.find("_vault") != ptVault->m.end())
-                                    {
-                                      delete ptVault->m["_vault"];
-                                      ptVault->m.erase("_vault");
-                                    }
-                                    strBuffer[1].append(ptVault->j(strLine)+"\n");
-                                    delete ptVault;
-                                  }
-                                  else
-                                  {
-                                    strBuffer[1].append(strLine+"\n");
-                                  }
-                                }
-                                ssMessage << "[Service:" << (*i)->ptRequest->m["Service"]->v << ",Port:" << (string)((bConcentrator)?"concentrator":((bStandard)?"standard":"secure")) << ",IP:" << szIP << ",Duration:" << ((*i)->CEnd - (*i)->CStart) << "]  ";
-                                if (!strError.empty())
-                                {
-                                  (*i)->ptRequest->insert("Error", strError);
-                                }
-                                if ((*i)->ptRequest->m.find("Password") != (*i)->ptRequest->m.end())
-                                {
-                                  (*i)->ptRequest->insert("Password", "******");
-                                }
-                                ssMessage << (*i)->ptRequest;
-                                gpCentral->log(ssMessage.str());
-                                delete (*i)->ptRequest;
-                                delete *i;
-                                removeList.push_back(i);
+                                (*i)->ptRequest->insert("Error", strError);
                               }
+                              if ((*i)->ptRequest->m.find("Password") != (*i)->ptRequest->m.end())
+                              {
+                                (*i)->ptRequest->insert("Password", "******");
+                              }
+                              ssMessage << (*i)->ptRequest;
+                              gpCentral->log(ssMessage.str());
+                              delete (*i)->ptRequest;
+                              delete *i;
+                              removeList.push_back(i);
                             }
                           }
                           for (auto &i : removeList)
