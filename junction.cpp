@@ -131,6 +131,7 @@ struct connection
   pid_t childPid;
   string strBuffer[2];
   string strCommand;
+  string strError;
   time_t CStart;
   time_t CEnd;
   time_t CTerm;
@@ -771,7 +772,6 @@ int main(int argc, char *argv[])
                           // {{{ service pipes
                           for (auto i = queue.begin(); i != queue.end(); i++)
                           {
-                            string strError;
                             for (size_t unfdIndex = 1; unfdIndex < unfdSize; unfdIndex++)
                             {
                               // {{{ read
@@ -792,19 +792,19 @@ int main(int argc, char *argv[])
                                     {
                                       stringstream ssError;
                                       ssError << "read(" << errno << ") " << strerror(errno);
-                                      strError = ssError.str();
+                                      (*i)->strError = ssError.str();
                                     }
                                   }
                                 }
                                 if (fds[unfdIndex].revents & POLLERR)
                                 {
                                   (*i)->bDone = true;
-                                  strError = "poll() Encountered a POLLERR.";
+                                  (*i)->strError = "poll() Encountered a POLLERR.";
                                 }
                                 if (fds[unfdIndex].revents & POLLNVAL)
                                 {
                                   (*i)->bDone = true;
-                                  strError = "poll() Encountered a POLLNVAL.";
+                                  (*i)->strError = "poll() Encountered a POLLNVAL.";
                                 }
                               }
                               // }}}
@@ -825,29 +825,24 @@ int main(int argc, char *argv[])
                                     {
                                       stringstream ssError;
                                       ssError << "write(" << errno << ") " << strerror(errno);
-                                      strError = ssError.str();
+                                      (*i)->strError = ssError.str();
                                     }
                                   }
                                 }
                                 if (fds[unfdIndex].revents & POLLERR)
                                 {
                                   (*i)->bDone = true;
-                                  strError = "poll() Encountered a POLLERR.";
+                                  (*i)->strError = "poll() Encountered a POLLERR.";
                                 }
                                 if (fds[unfdIndex].revents & POLLNVAL)
                                 {
                                   (*i)->bDone = true;
-                                  strError = "poll() Encountered a POLLNVAL.";
+                                  (*i)->strError = "poll() Encountered a POLLNVAL.";
                                 }
                               }
                               // }}}
                             }
                           }
-                          for (auto &i : removeList)
-                          {
-                            queue.erase(i);
-                          }
-                          removeList.clear();
                           // }}}
                         }
                         else if (nReturn < 0)
@@ -859,7 +854,6 @@ int main(int argc, char *argv[])
                         // {{{ service pipes
                         for (auto i = queue.begin(); i != queue.end(); i++)
                         {
-                          string strError;
                           time(&((*i)->CEnd));
                           if (((*i)->CEnd - (*i)->CStart) > (*i)->CTimeout)
                           {
@@ -873,7 +867,7 @@ int main(int argc, char *argv[])
                             {
                               gpCentral->log("Sent SIGKILL.");
                               (*i)->bDone = true;
-                              strError = "Request timed out.";
+                              (*i)->strError = "Request timed out.";
                               kill((*i)->childPid, SIGKILL);
                             }
                           }
@@ -905,9 +899,9 @@ int main(int argc, char *argv[])
                               }
                             }
                             ssMessage << "[Service:" << (*i)->ptRequest->m["Service"]->v << ",Port:" << (string)((bConcentrator)?"concentrator":((bStandard)?"standard":"secure")) << ",IP:" << szIP << ",Duration:" << ((*i)->CEnd - (*i)->CStart) << "]  ";
-                            if (!strError.empty())
+                            if (!(*i)->strError.empty())
                             {
-                              (*i)->ptRequest->insert("Error", strError);
+                              (*i)->ptRequest->insert("Error", (*i)->strError);
                             }
                             if ((*i)->ptRequest->m.find("Password") != (*i)->ptRequest->m.end())
                             {
