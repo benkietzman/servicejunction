@@ -526,249 +526,250 @@ int main(int argc, char *argv[])
                         }
                         if ((nReturn = poll(fds, unfdSize, 2000)) > 0)
                         {
-                          for (size_t unfdIndex = 0; unfdIndex < unfdSize; unfdIndex++)
+                          list<list<connection *>::iterator> removeList;
+                          // {{{ read
+                          if (fds[0].revents & (POLLIN | POLLHUP))
                           {
-                            list<list<connection *>::iterator> removeList;
-                            // {{{ client socket
-                            if (fds[unfdIndex].fd == fdData)
+                            if ((bStandard && gpCentral->utility()->fdRead(fdData, strBuffer[0], nReturn)) || (bSecure && gpCentral->utility()->sslRead(ssl, strBuffer[0], nReturn)))
                             {
-                              // {{{ read
-                              if (fds[unfdIndex].revents & (POLLIN | POLLHUP))
+                              bool bHaveRequest = true;
+                              while ((unPosition = strBuffer[0].find("\n")) != string::npos)
                               {
-                                if ((bStandard && gpCentral->utility()->fdRead(fdData, strBuffer[0], nReturn)) || (bSecure && gpCentral->utility()->sslRead(ssl, strBuffer[0], nReturn)))
+                                buffer.push_back(strBuffer[0].substr(0, unPosition));
+                                strBuffer[0].erase(0, (unPosition + 1));
+                              }
+                              while (bHaveRequest && !buffer.empty())
+                              {
+                                list<string> lines;
+                                string strTrim;
+                                bHaveRequest = false;
+                                for (auto i = buffer.begin(); !bHaveRequest && i != buffer.end(); i++)
                                 {
-                                  bool bHaveRequest = true;
-                                  while ((unPosition = strBuffer[0].find("\n")) != string::npos)
+                                  gpCentral->manip()->trim(strTrim, (*i));
+                                  if (strTrim == "end")
                                   {
-                                    buffer.push_back(strBuffer[0].substr(0, unPosition));
-                                    strBuffer[0].erase(0, (unPosition + 1));
+                                    bHaveRequest = true;
                                   }
-                                  while (bHaveRequest && !buffer.empty())
+                                  lines.push_back(*i);
+                                }
+                                if (bHaveRequest)
+                                {
+                                  string strError, strRequest = lines.front();
+                                  Json *ptRequest;
+                                  for (size_t i = 0; i < lines.size(); i++)
                                   {
-                                    list<string> lines;
-                                    string strTrim;
-                                    bHaveRequest = false;
-                                    for (auto i = buffer.begin(); !bHaveRequest && i != buffer.end(); i++)
+                                    buffer.pop_front();
+                                  }
+                                  gpCentral->manip()->trim(strRequest, strRequest);
+                                  ptRequest = new Json(strRequest);
+                                  if (ptRequest->m.find("Service") != ptRequest->m.end() && !ptRequest->m["Service"]->v.empty())
+                                  {
+                                    string strCommand;
+                                    if (service.find(ptRequest->m["Service"]->v) != service.end())
                                     {
-                                      gpCentral->manip()->trim(strTrim, (*i));
-                                      if (strTrim == "end")
+                                      string strThrottle;
+                                      if (ptRequest->m.find("Throttle") != ptRequest->m.end() && !ptRequest->m["Throttle"]->v.empty() && atoi(ptRequest->m["Throttle"]->v.c_str()) > 0)
                                       {
-                                        bHaveRequest = true;
+                                        strThrottle = ptRequest->m["Throttle"]->v;
                                       }
-                                      lines.push_back(*i);
-                                    }
-                                    if (bHaveRequest)
-                                    {
-                                      string strError, strRequest = lines.front();
-                                      Json *ptRequest;
-                                      for (size_t i = 0; i < lines.size(); i++)
+                                      else if (service[ptRequest->m["Service"]->v].find("Throttle") != service[ptRequest->m["Service"]->v].end() && !service[ptRequest->m["Service"]->v]["Throttle"].empty() && atoi(service[ptRequest->m["Service"]->v]["Throttle"].c_str()) > 0)
                                       {
-                                        buffer.pop_front();
+                                        strThrottle = service[ptRequest->m["Service"]->v]["Throttle"];
                                       }
-                                      gpCentral->manip()->trim(strRequest, strRequest);
-                                      ptRequest = new Json(strRequest);
-                                      if (ptRequest->m.find("Service") != ptRequest->m.end() && !ptRequest->m["Service"]->v.empty())
+                                      if (!bConcentrator && !strThrottle.empty() && service.find("portConcentrator") != service.end())
                                       {
-                                        string strCommand;
-                                        if (service.find(ptRequest->m["Service"]->v) != service.end())
+                                        string strReqApp, strService = ptRequest->m["Service"]->v, strTimeout;
+                                        if (ptRequest->m.find("reqApp") != ptRequest->m.end() && !ptRequest->m["reqApp"]->v.empty())
                                         {
-                                          string strThrottle;
-                                          if (ptRequest->m.find("Throttle") != ptRequest->m.end() && !ptRequest->m["Throttle"]->v.empty() && atoi(ptRequest->m["Throttle"]->v.c_str()) > 0)
-                                          {
-                                            strThrottle = ptRequest->m["Throttle"]->v;
-                                          }
-                                          else if (service[ptRequest->m["Service"]->v].find("Throttle") != service[ptRequest->m["Service"]->v].end() && !service[ptRequest->m["Service"]->v]["Throttle"].empty() && atoi(service[ptRequest->m["Service"]->v]["Throttle"].c_str()) > 0)
-                                          {
-                                            strThrottle = service[ptRequest->m["Service"]->v]["Throttle"];
-                                          }
-                                          if (!bConcentrator && !strThrottle.empty() && service.find("portConcentrator") != service.end())
-                                          {
-                                            string strReqApp, strService = ptRequest->m["Service"]->v, strTimeout;
-                                            if (ptRequest->m.find("reqApp") != ptRequest->m.end() && !ptRequest->m["reqApp"]->v.empty())
-                                            {
-                                              strReqApp = ptRequest->m["reqApp"]->v;
-                                            }
-                                            if (ptRequest->m.find("Timeout") != ptRequest->m.end() && !ptRequest->m["Timeout"]->v.empty())
-                                            {
-                                              strTimeout = ptRequest->m["Timeout"]->v;
-                                            }
-                                            delete ptRequest;
-                                            ptRequest = new Json;
-                                            ptRequest->insert("Service", "portConcentrator");
-                                            ptRequest->insert("SubService", strService);
-                                            ptRequest->insert("Throttle", strThrottle);
-                                            if (!strReqApp.empty())
-                                            {
-                                              ptRequest->insert("reqApp", strReqApp);
-                                            }
-                                            if (!strTimeout.empty())
-                                            {
-                                              ptRequest->insert("Timeout", strTimeout);
-                                            }
-                                            ptRequest->j(strRequest);
-                                            lines.push_front(strRequest);
-                                          }
-                                          strCommand = service[ptRequest->m["Service"]->v]["Command"];
+                                          strReqApp = ptRequest->m["reqApp"]->v;
                                         }
-                                        if (!strCommand.empty())
+                                        if (ptRequest->m.find("Timeout") != ptRequest->m.end() && !ptRequest->m["Timeout"]->v.empty())
                                         {
-                                          if (bConcentrator || service[ptRequest->m["Service"]->v]["Port"] == "both" || (bStandard && service[ptRequest->m["Service"]->v]["Port"] == "standard") || (bSecure && service[ptRequest->m["Service"]->v]["Port"] == "secure"))
+                                          strTimeout = ptRequest->m["Timeout"]->v;
+                                        }
+                                        delete ptRequest;
+                                        ptRequest = new Json;
+                                        ptRequest->insert("Service", "portConcentrator");
+                                        ptRequest->insert("SubService", strService);
+                                        ptRequest->insert("Throttle", strThrottle);
+                                        if (!strReqApp.empty())
+                                        {
+                                          ptRequest->insert("reqApp", strReqApp);
+                                        }
+                                        if (!strTimeout.empty())
+                                        {
+                                          ptRequest->insert("Timeout", strTimeout);
+                                        }
+                                        ptRequest->j(strRequest);
+                                        lines.push_front(strRequest);
+                                      }
+                                      strCommand = service[ptRequest->m["Service"]->v]["Command"];
+                                    }
+                                    if (!strCommand.empty())
+                                    {
+                                      if (bConcentrator || service[ptRequest->m["Service"]->v]["Port"] == "both" || (bStandard && service[ptRequest->m["Service"]->v]["Port"] == "standard") || (bSecure && service[ptRequest->m["Service"]->v]["Port"] == "secure"))
+                                      {
+                                        char *args[100], *pszArgument;
+                                        int readpipe[2] = {-1, -1}, writepipe[2] = {-1, -1};
+                                        pid_t childPid;
+                                        string strArgument;
+                                        stringstream ssCommand, ssMessage;
+                                        time_t CStart = 0, CEnd = 0, CTimeout = CHILD_TIMEOUT;
+                                        unsigned int unIndex = 0;
+                                        time(&CStart);
+                                        if (ptRequest->m.find("Timeout") != ptRequest->m.end() && !ptRequest->m["Timeout"]->v.empty())
+                                        {
+                                          bool bNumeric = true;
+                                          for (unsigned int i = 0; i < ptRequest->m["Timeout"]->v.size(); i++)
                                           {
-                                            char *args[100], *pszArgument;
-                                            int readpipe[2] = {-1, -1}, writepipe[2] = {-1, -1};
-                                            pid_t childPid;
-                                            string strArgument;
-                                            stringstream ssCommand, ssMessage;
-                                            time_t CStart = 0, CEnd = 0, CTimeout = CHILD_TIMEOUT;
-                                            unsigned int unIndex = 0;
-                                            time(&CStart);
-                                            if (ptRequest->m.find("Timeout") != ptRequest->m.end() && !ptRequest->m["Timeout"]->v.empty())
+                                            if (!isdigit(ptRequest->m["Timeout"]->v[i]))
                                             {
-                                              bool bNumeric = true;
-                                              for (unsigned int i = 0; i < ptRequest->m["Timeout"]->v.size(); i++)
-                                              {
-                                                if (!isdigit(ptRequest->m["Timeout"]->v[i]))
-                                                {
-                                                  bNumeric = false;
-                                                }
-                                              }
-                                              if (bNumeric)
-                                              {
-                                                CTimeout = atoi(ptRequest->m["Timeout"]->v.c_str());
-                                              }
+                                              bNumeric = false;
                                             }
-                                            ssCommand.str(strCommand);
-                                            while (ssCommand >> strArgument)
+                                          }
+                                          if (bNumeric)
+                                          {
+                                            CTimeout = atoi(ptRequest->m["Timeout"]->v.c_str());
+                                          }
+                                        }
+                                        ssCommand.str(strCommand);
+                                        while (ssCommand >> strArgument)
+                                        {
+                                          pszArgument = new char[strArgument.size() + 1];
+                                          strcpy(pszArgument, strArgument.c_str());
+                                          args[unIndex++] = pszArgument;
+                                        }
+                                        args[unIndex] = NULL;
+                                        if (pipe(readpipe) == 0)
+                                        {
+                                          if (pipe(writepipe) == 0)
+                                          {
+                                            if ((childPid = fork()) == 0)
                                             {
-                                              pszArgument = new char[strArgument.size() + 1];
-                                              strcpy(pszArgument, strArgument.c_str());
-                                              args[unIndex++] = pszArgument;
+                                              close(PARENT_WRITE);
+                                              close(PARENT_READ);
+                                              dup2(CHILD_READ, 0);
+                                              close(CHILD_READ);
+                                              dup2(CHILD_WRITE, 1);
+                                              close(CHILD_WRITE);
+                                              execve(args[0], args, environ);
+                                              _exit(1);
                                             }
-                                            args[unIndex] = NULL;
-                                            if (pipe(readpipe) == 0)
+                                            else if (childPid > 0)
                                             {
-                                              if (pipe(writepipe) == 0)
+                                              connection *ptConnection = new connection;
+                                              string strLine;
+                                              close(CHILD_READ);
+                                              close(CHILD_WRITE);
+                                              ptConnection->readpipe = PARENT_READ;
+                                              ptConnection->writepipe = PARENT_WRITE;
+                                              ptConnection->ptRequest = new Json(ptRequest);
+                                              ptConnection->childPid = childPid;
+                                              ptConnection->CStart = CStart;
+                                              ptConnection->CEnd = CEnd;
+                                              ptConnection->CTerm = 0;
+                                              ptConnection->CTimeout = CTimeout;
+                                              ptConnection->strCommand = strCommand;
+                                              if (pWarden != NULL && ptWarden->m.find(ptRequest->m["Service"]->v) != ptWarden->m.end())
                                               {
-                                                if ((childPid = fork()) == 0)
-                                                {
-                                                  close(PARENT_WRITE);
-                                                  close(PARENT_READ);
-                                                  dup2(CHILD_READ, 0);
-                                                  close(CHILD_READ);
-                                                  dup2(CHILD_WRITE, 1);
-                                                  close(CHILD_WRITE);
-                                                  execve(args[0], args, environ);
-                                                  _exit(1);
-                                                }
-                                                else if (childPid > 0)
-                                                {
-                                                  connection *ptConnection = new connection;
-                                                  string strLine;
-                                                  close(CHILD_READ);
-                                                  close(CHILD_WRITE);
-                                                  ptConnection->readpipe = PARENT_READ;
-                                                  ptConnection->writepipe = PARENT_WRITE;
-                                                  ptConnection->ptRequest = new Json(ptRequest);
-                                                  ptConnection->childPid = childPid;
-                                                  ptConnection->CStart = CStart;
-                                                  ptConnection->CEnd = CEnd;
-                                                  ptConnection->CTerm = 0;
-                                                  ptConnection->CTimeout = CTimeout;
-                                                  ptConnection->strCommand = strCommand;
-                                                  if (pWarden != NULL && ptWarden->m.find(ptRequest->m["Service"]->v) != ptWarden->m.end())
-                                                  {
-                                                    string strJson;
-                                                    Json *ptVault = new Json(strRequest);
-                                                    ptVault->insert("_vault", ptWarden->m[ptRequest->m["Service"]->v]);
-                                                    lines.pop_front();
-                                                    lines.push_front(ptVault->j(strJson));
-                                                    delete ptVault;
-                                                  }
-                                                  while (!lines.empty())
-                                                  {
-                                                    ptConnection->strBuffer[1].append(lines.front() + "\n");
-                                                    lines.pop_front();
-                                                  }
-                                                  queue.push_back(ptConnection);
-                                                }
-                                                else
-                                                {
-                                                  strError = (string)"Failed to fork process to system call.  " + (string)strerror(errno);
-                                                }
+                                                string strJson;
+                                                Json *ptVault = new Json(strRequest);
+                                                ptVault->insert("_vault", ptWarden->m[ptRequest->m["Service"]->v]);
+                                                lines.pop_front();
+                                                lines.push_front(ptVault->j(strJson));
+                                                delete ptVault;
                                               }
-                                              else
+                                              while (!lines.empty())
                                               {
-                                                strError = (string)"Failed to establish write pipe to system call.  " + (string)strerror(errno);
+                                                ptConnection->strBuffer[1].append(lines.front() + "\n");
+                                                lines.pop_front();
                                               }
+                                              queue.push_back(ptConnection);
                                             }
                                             else
                                             {
-                                              strError = (string)"Failed to establish read pipe to system call.  " + (string)strerror(errno);
+                                              strError = (string)"Failed to fork process to system call.  " + (string)strerror(errno);
                                             }
-                                            for (unsigned int i = 0; i < unIndex; i++)
-                                            {
-                                              delete[] args[i];
-                                            }
-                                          }
-                                          else if (bStandard && service[ptRequest->m["Service"]->v]["Port"] == "standard")
-                                          {
-                                            strError = "The request arrived on the secure port when the service requires the standard port.";
-                                          }
-                                          else if (bSecure && service[ptRequest->m["Service"]->v]["Port"] == "secure")
-                                          {
-                                            strError = "The request arrived on the standard port when the service requires the secure port.";
                                           }
                                           else
                                           {
-                                            strError = "Invalid configuration of Port value in service configuration.";
+                                            strError = (string)"Failed to establish write pipe to system call.  " + (string)strerror(errno);
                                           }
                                         }
                                         else
                                         {
-                                          strError = "The requested service does not exist.";
+                                          strError = (string)"Failed to establish read pipe to system call.  " + (string)strerror(errno);
                                         }
+                                        for (unsigned int i = 0; i < unIndex; i++)
+                                        {
+                                          delete[] args[i];
+                                        }
+                                      }
+                                      else if (bStandard && service[ptRequest->m["Service"]->v]["Port"] == "standard")
+                                      {
+                                        strError = "The request arrived on the secure port when the service requires the standard port.";
+                                      }
+                                      else if (bSecure && service[ptRequest->m["Service"]->v]["Port"] == "secure")
+                                      {
+                                        strError = "The request arrived on the standard port when the service requires the secure port.";
                                       }
                                       else
                                       {
-                                        strError = "Please provide the Service.";
+                                        strError = "Invalid configuration of Port value in service configuration.";
                                       }
-                                      if (!strError.empty())
-                                      {
-                                        string strJson;
-                                        ptRequest->insert("Status", "error");
-                                        ptRequest->insert("Error", strError);
-                                        ptRequest->j(strJson);
-                                        strJson += "\nend\n";
-                                        strBuffer[1].append(strJson);
-                                      }
-                                      delete ptRequest;
                                     }
-                                    lines.clear();
+                                    else
+                                    {
+                                      strError = "The requested service does not exist.";
+                                    }
                                   }
-                                  if ((gunMaxBuffer > 0 && strBuffer[0].size() > (gunMaxBuffer * 1024 * 1024)) || (gunMaxLines > 0 && buffer.size() > gunMaxLines))
+                                  else
                                   {
-                                    bExit = true;
+                                    strError = "Please provide the Service.";
                                   }
+                                  if (!strError.empty())
+                                  {
+                                    string strJson;
+                                    ptRequest->insert("Status", "error");
+                                    ptRequest->insert("Error", strError);
+                                    ptRequest->j(strJson);
+                                    strJson += "\nend\n";
+                                    strBuffer[1].append(strJson);
+                                  }
+                                  delete ptRequest;
                                 }
-                                else
-                                {
-                                  bExit = true;
-                                }
+                                lines.clear();
                               }
-                              // }}}
-                              // {{{ write
-                              if (fds[unfdIndex].revents & POLLOUT)
+                              if ((gunMaxBuffer > 0 && strBuffer[0].size() > (gunMaxBuffer * 1024 * 1024)) || (gunMaxLines > 0 && buffer.size() > gunMaxLines))
                               {
-                                if ((bStandard && !gpCentral->utility()->fdWrite(fdData, strBuffer[1], nReturn)) || (bSecure && !gpCentral->utility()->sslWrite(ssl, strBuffer[1], nReturn)))
-                                {
-                                  bExit = true;
-                                }
+                                bExit = true;
                               }
-                              // }}}
                             }
-                            // }}}
-                            // {{{ service pipes
-                            for (auto i = queue.begin(); i != queue.end(); i++)
+                            else
+                            {
+                              bExit = true;
+                            }
+                          }
+                          // }}}
+                          // {{{ write
+                          if (fds[0].revents & POLLOUT)
+                          {
+                            if ((bStandard && !gpCentral->utility()->fdWrite(fdData, strBuffer[1], nReturn)) || (bSecure && !gpCentral->utility()->sslWrite(ssl, strBuffer[1], nReturn)))
+                            {
+                              bExit = true;
+                            }
+                          }
+                          // }}}
+                          // {{{ invalid
+                          if (fds[0].revents & (POLLERR | POLLNVAL))
+                          {
+                            bExit = true;
+                          }
+                          // }}}
+                          // {{{ service pipes
+                          for (auto i = queue.begin(); i != queue.end(); i++)
+                          {
+                            for (size_t unfdIndex = 1; unfdIndex < unfdSize; unfdIndex++)
                             {
                               bool bDone = false;
                               string strError;
