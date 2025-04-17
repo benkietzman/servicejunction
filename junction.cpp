@@ -572,7 +572,7 @@ int main(int argc, char *argv[])
                                       if (ptRequest->m.find("Service") != ptRequest->m.end() && !ptRequest->m["Service"]->v.empty())
                                       {
                                         string strCommand;
-                                        Json *ptActualRequest;
+                                        Json *ptActualRequest = NULL;
                                         if (service.find(ptRequest->m["Service"]->v) != service.end())
                                         {
                                           string strThrottle;
@@ -733,6 +733,10 @@ int main(int argc, char *argv[])
                                         else
                                         {
                                           strError = "The requested service does not exist.";
+                                        }
+                                        if (ptActualRequest != NULL)
+                                        {
+                                          delete ptActualRequest;
                                         }
                                       }
                                       else
