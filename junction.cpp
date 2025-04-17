@@ -881,7 +881,20 @@ int main(int argc, char *argv[])
                           {
                             bool bFirst = true;
                             string strLine;
-                            stringstream ssBuffer((*i)->strBuffer[0] + "end\n"), ssMessage;
+                            stringstream ssBuffer, ssMessage;
+                            if (!(*i)->strBuffer[0].empty())
+                            {
+                              ssBuffer.str((*i)->strBuffer[0] + "end\n");
+                            }
+                            else
+                            {
+                              string strJson;
+                              (*i)->ptRequest->insert("Status", "error");
+                              (*i)->ptRequest->insert("Error", ((!(*i)->strError.empty())?(*i)->strError:"Empty response returned from service."));
+                              (*i)->ptRequest->j(strJson);
+                              ssBuffer.str(strJson + "\nend\n");
+                              strBuffer[1].append(strJson);
+                            }
                             close((*i)->readpipe);
                             close((*i)->writepipe);
                             (*i)->strBuffer[0].clear();
