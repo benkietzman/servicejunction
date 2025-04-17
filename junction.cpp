@@ -572,6 +572,7 @@ int main(int argc, char *argv[])
                                       if (ptRequest->m.find("Service") != ptRequest->m.end() && !ptRequest->m["Service"]->v.empty())
                                       {
                                         string strCommand;
+                                        Json *ptActualRequest;
                                         if (service.find(ptRequest->m["Service"]->v) != service.end())
                                         {
                                           string strThrottle;
@@ -594,23 +595,26 @@ int main(int argc, char *argv[])
                                             {
                                               strTimeout = ptRequest->m["Timeout"]->v;
                                             }
-                                            delete ptRequest;
-                                            ptRequest = new Json;
-                                            ptRequest->insert("Service", "portConcentrator");
-                                            ptRequest->insert("SubService", strService);
-                                            ptRequest->insert("Throttle", strThrottle);
+                                            ptActualRequest = new Json;
+                                            ptActualRequest->insert("Service", "portConcentrator");
+                                            ptActualRequest->insert("SubService", strService);
+                                            ptActualRequest->insert("Throttle", strThrottle);
                                             if (!strReqApp.empty())
                                             {
-                                              ptRequest->insert("reqApp", strReqApp);
+                                              ptActualRequest->insert("reqApp", strReqApp);
                                             }
                                             if (!strTimeout.empty())
                                             {
-                                              ptRequest->insert("Timeout", strTimeout);
+                                              ptActualRequest->insert("Timeout", strTimeout);
                                             }
-                                            ptRequest->j(strRequest);
+                                            ptActualRequest->j(strRequest);
                                             lines.push_front(strRequest);
                                           }
-                                          strCommand = service[ptRequest->m["Service"]->v]["Command"];
+                                          else
+                                          {
+                                            ptActualRequest = new Json(ptRequest);
+                                          }
+                                          strCommand = service[ptActualRequest->m["Service"]->v]["Command"];
                                         }
                                         if (!strCommand.empty())
                                         {
@@ -624,19 +628,19 @@ int main(int argc, char *argv[])
                                             time_t CStart = 0, CEnd = 0, CTimeout = CHILD_TIMEOUT;
                                             unsigned int unIndex = 0;
                                             time(&CStart);
-                                            if (ptRequest->m.find("Timeout") != ptRequest->m.end() && !ptRequest->m["Timeout"]->v.empty())
+                                            if (ptActualRequest->m.find("Timeout") != ptActualRequest->m.end() && !ptActualRequest->m["Timeout"]->v.empty())
                                             {
                                               bool bNumeric = true;
-                                              for (unsigned int i = 0; i < ptRequest->m["Timeout"]->v.size(); i++)
+                                              for (unsigned int i = 0; i < ptActualRequest->m["Timeout"]->v.size(); i++)
                                               {
-                                                if (!isdigit(ptRequest->m["Timeout"]->v[i]))
+                                                if (!isdigit(ptActualRequest->m["Timeout"]->v[i]))
                                                 {
                                                   bNumeric = false;
                                                 }
                                               }
                                               if (bNumeric)
                                               {
-                                                CTimeout = atoi(ptRequest->m["Timeout"]->v.c_str());
+                                                CTimeout = atoi(ptActualRequest->m["Timeout"]->v.c_str());
                                               }
                                             }
                                             ssCommand.str(strCommand);
@@ -678,11 +682,11 @@ int main(int argc, char *argv[])
                                                   ptConnection->CTerm = 0;
                                                   ptConnection->CTimeout = CTimeout;
                                                   ptConnection->strCommand = strCommand;
-                                                  if (pWarden != NULL && ptWarden->m.find(ptRequest->m["Service"]->v) != ptWarden->m.end())
+                                                  if (pWarden != NULL && ptWarden->m.find(ptActualRequest->m["Service"]->v) != ptWarden->m.end())
                                                   {
                                                     string strJson;
                                                     Json *ptVault = new Json(strRequest);
-                                                    ptVault->insert("_vault", ptWarden->m[ptRequest->m["Service"]->v]);
+                                                    ptVault->insert("_vault", ptWarden->m[ptActualRequest->m["Service"]->v]);
                                                     lines.pop_front();
                                                     lines.push_front(ptVault->j(strJson));
                                                     delete ptVault;
