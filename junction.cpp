@@ -893,7 +893,6 @@ int main(int argc, char *argv[])
                               (*i)->ptRequest->insert("Error", ((!(*i)->strError.empty())?(*i)->strError:"Empty response returned from service."));
                               (*i)->ptRequest->j(strJson);
                               ssBuffer.str(strJson + "\nend\n");
-                              strBuffer[1].append(strJson);
                             }
                             close((*i)->readpipe);
                             close((*i)->writepipe);
