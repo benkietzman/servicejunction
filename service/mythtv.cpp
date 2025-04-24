@@ -58,6 +58,7 @@ int main(int argc, char *argv[])
   loadRequest(request);
   if (request.size() == 2)
   {
+    response.push_back(new Json(request.back()));
     ptJson = new Json(request.front());
     if (ptJson->m.find("reqApp") != ptJson->m.end() && !ptJson->m["reqApp"]->v.empty())
     {
