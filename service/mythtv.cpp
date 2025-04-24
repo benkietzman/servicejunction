@@ -82,10 +82,10 @@ int main(int argc, char *argv[])
       if (ptReq->m.find("Service") != ptReq->m.end() && !ptReq->m["Service"]->v.empty())
       {
         ssURL << "/" << ptReq->m["Service"]->v;
-        if (ptReq->m.find("Command") != ptReq->m.end() && !ptReq->m["Command"]->v.empty())
+        if (ptReq->m.find("Function") != ptReq->m.end() && !ptReq->m["Function"]->v.empty())
         {
           string strContent, strCookies, strHeader;
-          ssURL << "/" << ptReq->m["Command"]->v;
+          ssURL << "/" << ptReq->m["Function"]->v;
           if (junction.curl(ssURL.str(), "", NULL, ((ptReq->m.find("Get") != ptReq->m.end())?ptReq->m["Get"]:NULL), ((ptReq->m.find("Post") != ptReq->m.end())?ptReq->m["Post"]:NULL), ((ptReq->m.find("Put") != ptReq->m.end())?ptReq->m["Put"]:NULL), strProxy, strCookies, strHeader, strContent, strError))
           {
             size_t unPosition;
@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
         }
         else
         {
-          strError = "Please provide the Command.";
+          strError = "Please provide the Function.";
         }
       }
       else
