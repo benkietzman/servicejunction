@@ -3,7 +3,7 @@
 ///////////////////////////////////////////
 // ZoneMinder
 // -------------------------------------
-// file       : zoneMidner.cpp
+// file       : zoneMinder.cpp
 // author     : Ben Kietzman
 // begin      : 2016-12-22
 // copyright  : kietzman.org
