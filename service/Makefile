@@ -10,8 +10,8 @@
 # {{{ prep work
 MAKE_UNAME=`uname -s`
 prefix=/usr/local
-all: bin/acorn bin/acronym bin/addrInfo bin/aes bin/bls bin/curl bin/format bin/google bin/jira bin/jwt bin/logger bin/mssql bin/mysql bin/password bin/pdf bin/ping bin/portConcentrator bin/samba bin/transmission bin/warden bin/zoneMinder
-install: bin/acorn bin/acronym bin/addrInfo bin/aes bin/bls central.php bin/curl email.php bin/format functions.php bin/google ircBot.php bin/jira bin/jwt listServices.php bin/logger bin/mssql bin/mysql bin/oracle bin/password bin/pdf bin/ping bin/portConcentrator bin/samba soap.php sysInfo.php tcpdf.php bin/teradata bin/transmission bin/warden weather.php bin/zoneMinder
+all: bin/acorn bin/acronym bin/addrInfo bin/aes bin/bls bin/curl bin/format bin/google bin/jira bin/jwt bin/logger bin/mssql bin/mysql bin/mythtv bin/password bin/pdf bin/ping bin/portConcentrator bin/samba bin/transmission bin/warden bin/zoneMinder
+install: bin/acorn bin/acronym bin/addrInfo bin/aes bin/bls central.php bin/curl email.php bin/format functions.php bin/google ircBot.php bin/jira bin/jwt listServices.php bin/logger bin/mssql bin/mysql bin/mythtv bin/oracle bin/password bin/pdf bin/ping bin/portConcentrator bin/samba soap.php sysInfo.php tcpdf.php bin/teradata bin/transmission bin/warden weather.php bin/zoneMinder
 	install --mode=775 bin/acorn $(prefix)/servicejunction/service/
 	install --mode=775 bin/acronym $(prefix)/servicejunction/service/
 	install --mode=775 bin/addrInfo $(prefix)/servicejunction/service/
@@ -31,6 +31,7 @@ install: bin/acorn bin/acronym bin/addrInfo bin/aes bin/bls central.php bin/curl
 	install --mode=775 bin/logger $(prefix)/servicejunction/service/
 	install --mode=775 bin/mssql $(prefix)/servicejunction/service/
 	install --mode=775 bin/mysql $(prefix)/servicejunction/service/
+	install --mode=775 bin/mythtv $(prefix)/servicejunction/service/
 	install --mode=775 bin/oracle $(prefix)/servicejunction/service/
 	install --mode=775 bin/password $(prefix)/servicejunction/service/
 	install --mode=775 bin/pdf $(prefix)/servicejunction/service/
@@ -174,6 +175,14 @@ bin/mysql: ../../common/libcommon.a obj/functions.o obj/mysql.o bin
 	g++ -o bin/mysql obj/mysql.o obj/functions.o -L/usr/lib64/mysql -L/data/extras/lib -L../../common -lcommon -lb64 -lcrypto -lcurl -lmysqlclient -lexpat -lmjson -lpthread -lssl -ltar -lz
 obj/mysql.o: mysql.cpp obj ../../common/Makefile
 	g++ -g -Wall -c mysql.cpp -o obj/mysql.o -I/usr/local/mysql/include -I/usr/local/ssl/include -I/data/extras/include -I../../common;
+# }}}
+# {{{ mythtv
+mythtv: bin/mythtv
+	install --mode=775 bin/mythtv $(prefix)/servicejunction/service/
+bin/mythtv: ../../common/libcommon.a obj/functions.o obj/mythtv.o bin
+	g++ -o bin/mythtv obj/mythtv.o obj/functions.o -L/data/extras/lib -L../../common -lcommon -lb64 -lcrypto -lcurl -lexpat -lmjson -lpthread -lssl -ltar -lz
+obj/mythtv.o: mythtv.cpp obj ../../common/Makefile
+	g++ -g -Wall -c mythtv.cpp -o obj/mythtv.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
 # }}}
 # {{{ oracle
 oracle: bin/oracle
