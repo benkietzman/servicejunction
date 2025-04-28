@@ -44,4 +44,3 @@ void loadRequest(map<string, string> &requestArray, list<string> &request);
 void *myrealloc(void *ptr, size_t size);
 int mytrace(CURL *handle, curl_infotype type, char *data, size_t size, void *userp);
 size_t writeMemoryCallback(void *ptr, size_t size, size_t nmemb, void *data);
-
