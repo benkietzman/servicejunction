@@ -11,7 +11,7 @@
 MAKE_UNAME=`uname -s`
 prefix=/usr/local
 all: bin/acorn bin/acronym bin/addrInfo bin/aes bin/bls bin/curl bin/format bin/google bin/jira bin/jwt bin/logger bin/mssql bin/mysql bin/password bin/pdf bin/ping bin/portConcentrator bin/samba bin/transmission bin/warden bin/zoneMinder
-install: bin/acorn bin/acronym bin/addrInfo bin/aes bin/bls central.php bin/curl email.php bin/format functions.php bin/google ircBot.php bin/jira bin/jwt listServices.php bin/logger bin/mssql bin/mysql bin/oracle bin/password bin/pdf bin/ping bin/portConcentrator bin/samba soap.php sysInfo.php tcpdf.php bin/teradata bin/transmission bin/warden weather.php bin/zoneMinder
+install: bin/acorn bin/acronym bin/addrInfo bin/aes bin/bls central.php bin/curl email.php bin/format functions.php bin/google ircBot.php bin/jira bin/jwt listServices.php bin/logger bin/mssql bin/mysql bin/oracle bin/password bin/pdf bin/ping bin/portConcentrator bin/samba soap.php tcpdf.php bin/teradata bin/transmission bin/warden weather.php bin/zoneMinder
 	install --mode=775 bin/acorn $(prefix)/servicejunction/service/
 	install --mode=775 bin/acronym $(prefix)/servicejunction/service/
 	install --mode=775 bin/addrInfo $(prefix)/servicejunction/service/
@@ -38,7 +38,6 @@ install: bin/acorn bin/acronym bin/addrInfo bin/aes bin/bls central.php bin/curl
 	install --mode=775 bin/portConcentrator $(prefix)/servicejunction/service/
 	install --mode=775 bin/samba $(prefix)/servicejunction/service/
 	install --mode=664 soap.php $(prefix)/servicejunction/service/
-	install --mode=664 sysInfo.php $(prefix)/servicejunction/service/
 	install --mode=664 tcpdf.php $(prefix)/servicejunction/service/
 	install --mode=775 bin/teradata $(prefix)/servicejunction/service/
 	install --mode=775 bin/transmission $(prefix)/servicejunction/service/
@@ -226,10 +225,6 @@ obj/samba.o: samba.cpp obj ../../common/Makefile
 # {{{ soap
 soap: soap.php functions.php
 	install --mode=664 soap.php $(prefix)/servicejunction/service/
-# }}}
-# {{{ sysInfo
-sysInfo: sysInfo.php functions.php
-	install --mode=664 sysInfo.php $(prefix)/servicejunction/service/
 # }}}
 # {{{ tcpdf
 tcpdf: tcpdf.php functions.php
