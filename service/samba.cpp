@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
               // {{{ directoryExist
               if (ptJson->m["Function"]->v == "directoryExist")
               {
-                if (strPath.empty())
+                if (!strPath.empty())
                 {
                   if (samba.directoryExist(strPath, strError))
                   {
