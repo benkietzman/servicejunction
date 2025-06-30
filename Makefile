@@ -8,11 +8,7 @@
 # email      : ben@kietzman.org
 ###########################################
 
-all: bin/centralmon bin/junction
-
-bin/centralmon: ../common/libcommon.a obj/centralmon.o
-	-if [ ! -d bin ]; then mkdir bin; fi;
-	g++ -o bin/centralmon obj/centralmon.o -L/data/extras/lib -L../common -lcommon -lexpat -lmjson
+all: bin/junction
 
 bin/junction: ../common/libcommon.a obj/junction.o
 	-if [ ! -d bin ]; then mkdir bin; fi;
@@ -27,18 +23,13 @@ bin/junction: ../common/libcommon.a obj/junction.o
 ../common/configure:
 	cd ../; git clone https://github.com/benkietzman/common.git
 
-obj/centralmon.o: centralmon.cpp ../common/Makefile
-	-if [ ! -d obj ]; then mkdir obj; fi;
-	g++ -g -Wall -c centralmon.cpp -o obj/centralmon.o -I/data/extras/include -I../common
-
 obj/junction.o: junction.cpp ../common/Makefile
 	-if [ ! -d obj ]; then mkdir obj; fi;
 	g++ -fPIC -g -Wall -c junction.cpp -o obj/junction.o -I/data/extras/include -I../common
 
-install: bin/centralmon bin/junction
+install: bin/junction
 	-if [ ! -d /usr/local/servicejunction ]; then mkdir /usr/local/servicejunction; fi;
 	-if [ ! -d /usr/local/servicejunction/service ]; then mkdir /usr/local/servicejunction/service; fi;
-	install --mode=777 bin/centralmon /usr/local/servicejunction/
 	install --mode=777 bin/junction /usr/local/servicejunction/junction_preload
 	if [ ! -f /lib/systemd/system/junction.service ]; then install --mode=644 junction.service /lib/systemd/system/; fi
 
