@@ -10,15 +10,14 @@
 # {{{ prep work
 MAKE_UNAME=`uname -s`
 prefix=/usr/local
-all: bin/acorn bin/acronym bin/addrInfo bin/aes bin/bls bin/centralmon bin/curl bin/format bin/google bin/jira bin/jwt bin/logger bin/mssql bin/mysql bin/password bin/pdf bin/ping bin/portConcentrator bin/samba bin/transmission bin/warden bin/zoneMinder
-install: bin/acorn bin/acronym bin/addrInfo bin/aes bin/bls central.php bin/centralmon bin/curl email.php bin/format functions.php bin/google ircBot.php bin/jira bin/jwt listServices.php bin/logger bin/mssql bin/mysql bin/oracle bin/password bin/pdf bin/ping bin/portConcentrator bin/samba soap.php tcpdf.php bin/teradata bin/transmission bin/warden weather.php bin/zoneMinder
+all: bin/acorn bin/acronym bin/addrInfo bin/aes bin/bls bin/curl bin/format bin/google bin/jira bin/jwt bin/logger bin/mssql bin/mysql bin/password bin/pdf bin/ping bin/portConcentrator bin/samba bin/transmission bin/warden bin/zoneMinder
+install: bin/acorn bin/acronym bin/addrInfo bin/aes bin/bls central.php bin/curl email.php bin/format functions.php bin/google ircBot.php bin/jira bin/jwt listServices.php bin/logger bin/mssql bin/mysql bin/oracle bin/password bin/pdf bin/ping bin/portConcentrator bin/samba soap.php tcpdf.php bin/teradata bin/transmission bin/warden weather.php bin/zoneMinder
 	install --mode=775 bin/acorn $(prefix)/servicejunction/service/
 	install --mode=775 bin/acronym $(prefix)/servicejunction/service/
 	install --mode=775 bin/addrInfo $(prefix)/servicejunction/service/
 	install --mode=775 bin/aes $(prefix)/servicejunction/service/
 	install --mode=775 bin/bls $(prefix)/servicejunction/service/
 	install --mode=664 central.php $(prefix)/servicejunction/service/
-	install --mode=775 bin/centralmon $(prefix)/servicejunction/service/
 	install --mode=775 bin/curl $(prefix)/servicejunction/service/
 	install --mode=664 email.php $(prefix)/servicejunction/service/
 	install --mode=775 bin/format $(prefix)/servicejunction/service/
@@ -90,14 +89,6 @@ obj/bls.o: bls.cpp obj ../../common/Makefile
 # {{{ central
 central: central.php functions.php
 	install --mode=664 central.php $(prefix)/servicejunction/service/
-# }}}
-# {{{ centralmon
-centralmon: bin/centralmon
-	install --mode=775 bin/centralmon $(prefix)/servicejunction/service/
-bin/centralmon: ../../common/libcommon.a obj/functions.o obj/centralmon.o bin
-	g++ -o bin/centralmon obj/centralmon.o obj/functions.o -L/data/extras/lib -L../../common -lcommon -lb64 -lcrypto -lexpat -lmjson -lpthread -lssl -ltar -lz
-obj/centralmon.o: centralmon.cpp obj ../../common/Makefile
-	g++ -g -Wall -c centralmon.cpp -o obj/centralmon.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
 # }}}
 # {{{ curl
 curl: bin/curl
