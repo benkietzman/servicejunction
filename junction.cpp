@@ -778,72 +778,72 @@ int main(int argc, char *argv[])
                           }
                           // }}}
                           // {{{ service pipes
-                          for (auto i = queue.begin(); i != queue.end(); i++)
+                          for (auto &i : queue)
                           {
                             // {{{ read
-                            if (fds[unfdIndex].fd == (*i)->readpipe)
+                            if (fds[unfdIndex].fd == i->readpipe)
                             {
                               if (fds[unfdIndex].revents & (POLLHUP | POLLIN))
                               {
                                 char szBuffer[65536];
                                 ssize_t nSubReturn;
-                                if ((nSubReturn = read((*i)->readpipe, szBuffer, 65536)) > 0)
+                                if ((nSubReturn = read(i->readpipe, szBuffer, 65536)) > 0)
                                 {
-                                  (*i)->strBuffer[0].append(szBuffer, nSubReturn);
+                                  i->strBuffer[0].append(szBuffer, nSubReturn);
                                 }
                                 else
                                 {
-                                  (*i)->bDone = true;
+                                  i->bDone = true;
                                   if (nSubReturn < 0)
                                   {
                                     stringstream ssError;
                                     ssError << "read(" << errno << ") " << strerror(errno);
-                                    (*i)->strError = ssError.str();
+                                    i->strError = ssError.str();
                                   }
                                 }
                               }
                               if (fds[unfdIndex].revents & POLLERR)
                               {
-                                (*i)->bDone = true;
-                                (*i)->strError = "poll() Encountered a POLLERR.";
+                                i->bDone = true;
+                                i->strError = "poll() Encountered a POLLERR.";
                               }
                               if (fds[unfdIndex].revents & POLLNVAL)
                               {
-                                (*i)->bDone = true;
-                                (*i)->strError = "poll() Encountered a POLLNVAL.";
+                                i->bDone = true;
+                                i->strError = "poll() Encountered a POLLNVAL.";
                               }
                             }
                             // }}}
                             // {{{ write
-                            if (fds[unfdIndex].fd == (*i)->writepipe)
+                            if (fds[unfdIndex].fd == i->writepipe)
                             {
                               if (fds[unfdIndex].revents & (POLLHUP | POLLOUT))
                               {
                                 ssize_t nSubReturn;
-                                if ((nSubReturn = write((*i)->writepipe, (*i)->strBuffer[1].c_str(), (*i)->strBuffer[1].size())) > 0)
+                                if ((nSubReturn = write(i->writepipe, i->strBuffer[1].c_str(), i->strBuffer[1].size())) > 0)
                                 {
-                                  (*i)->strBuffer[1].erase(0, nSubReturn);
+                                  i->strBuffer[1].erase(0, nSubReturn);
                                 }
                                 else
                                 {
-                                  (*i)->bDone = true;
+                                  i->bDone = true;
                                   if (nSubReturn < 0)
                                   {
                                     stringstream ssError;
                                     ssError << "write(" << errno << ") " << strerror(errno);
-                                    (*i)->strError = ssError.str();
+                                    i->strError = ssError.str();
                                   }
                                 }
                               }
                               if (fds[unfdIndex].revents & POLLERR)
                               {
-                                (*i)->bDone = true;
-                                (*i)->strError = "poll() Encountered a POLLERR.";
+                                i->bDone = true;
+                                i->strError = "poll() Encountered a POLLERR.";
                               }
                               if (fds[unfdIndex].revents & POLLNVAL)
                               {
-                                (*i)->bDone = true;
-                                (*i)->strError = "poll() Encountered a POLLNVAL.";
+                                i->bDone = true;
+                                i->strError = "poll() Encountered a POLLNVAL.";
                               }
                             }
                             // }}}
