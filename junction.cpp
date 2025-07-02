@@ -948,7 +948,6 @@ int main(int argc, char *argv[])
                       delete i;
                       gpCentral->log("Removed unaccounted for request from queue.");
                     }
-                    queue.clear();
                   }
                   else
                   {
