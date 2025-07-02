@@ -466,6 +466,8 @@ int main(int argc, char *argv[])
                     SSL *ssl = NULL;
                     sockaddr_storage addr;
                     socklen_t len = sizeof(addr);
+                    close(fdSocket);
+                    fdSocket = -1;
                     getpeername(fdData, (sockaddr*)&addr, &len);
                     if (addr.ss_family == AF_INET)
                     {
@@ -646,6 +648,7 @@ int main(int argc, char *argv[])
                                               {
                                                 if ((childPid = fork()) == 0)
                                                 {
+                                                  close(fdData);
                                                   close(PARENT_WRITE);
                                                   close(PARENT_READ);
                                                   dup2(CHILD_READ, 0);
