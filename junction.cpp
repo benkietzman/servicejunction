@@ -495,6 +495,8 @@ int main(int argc, char *argv[])
                     pollfd *fds;
                     size_t unPosition, unfdSize;
                     string strBuffer[2];
+                    time_t CActivity, CTime;
+                    time(&CActivity);
                     while (!bExit)
                     {
                       fds = new pollfd[(queue.size() * 2) + 1];
@@ -532,6 +534,7 @@ int main(int argc, char *argv[])
                               if ((bStandard && gpCentral->utility()->fdRead(fdData, strBuffer[0], nReturn)) || (bSecure && gpCentral->utility()->sslRead(ssl, strBuffer[0], nReturn)))
                               {
                                 bool bHaveRequest = true;
+                                time(&CActivity);
                                 while ((unPosition = strBuffer[0].find("\n")) != string::npos)
                                 {
                                   buffer.push_back(strBuffer[0].substr(0, unPosition));
@@ -763,7 +766,11 @@ int main(int argc, char *argv[])
                             // {{{ write
                             if (fds[unfdIndex].revents & POLLOUT)
                             {
-                              if ((bStandard && !gpCentral->utility()->fdWrite(fdData, strBuffer[1], nReturn)) || (bSecure && !gpCentral->utility()->sslWrite(ssl, strBuffer[1], nReturn)))
+                              if ((bStandard && gpCentral->utility()->fdWrite(fdData, strBuffer[1], nReturn)) || (bSecure && gpCentral->utility()->sslWrite(ssl, strBuffer[1], nReturn)))
+                              {
+                                time(&CActivity);
+                              }
+                              else
                               {
                                 bExit = true;
                               }
@@ -937,6 +944,11 @@ int main(int argc, char *argv[])
                       }
                       removeList.clear();
                       // }}}
+                      time(&CTime);
+                      if ((CTime - CActivity) >= 14400)
+                      {
+                        bExit = true;
+                      }
                     }
                     for (auto &i : queue)
                     {
