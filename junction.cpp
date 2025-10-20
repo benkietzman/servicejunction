@@ -137,7 +137,7 @@ static size_t gunMaxLines = 0; //!< Global lines limit.
 static string gstrApplication = "Service Junction"; //!< Global application name.
 static string gstrData = "/data/servicejunction"; //!< Global data path.
 static string gstrEmail; //!< Global notification email address.
-static string gstrWarden; //!< Global Warden unix socket path.
+static string gstrWarden = "/data/warden/socket"; //!< Global Warden unix socket path.
 static Central *gpCentral = NULL; //!< Contains the Central class.
 // }}}
 // {{{ prototypes
