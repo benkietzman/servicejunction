@@ -10,8 +10,8 @@
 # {{{ prep work
 MAKE_UNAME=`uname -s`
 prefix=/usr/local
-all: bin/acorn bin/acronym bin/addrInfo bin/aes bin/bls bin/curl bin/format bin/google bin/jira bin/jwt bin/logger bin/mssql bin/mysql bin/oracle bin/password bin/pdf bin/ping bin/portConcentrator bin/samba bin/transmission bin/warden bin/zoneMinder
-install: bin/acorn bin/acronym bin/addrInfo bin/aes bin/bls central.php bin/curl email.php bin/format functions.php bin/google ircBot.php bin/jira bin/jwt listServices.php bin/logger bin/mssql bin/mysql bin/oracle bin/password bin/pdf bin/ping bin/portConcentrator bin/samba soap.php tcpdf.php bin/teradata bin/transmission bin/warden weather.php bin/zoneMinder
+all: bin/acorn bin/acronym bin/addrInfo bin/aes bin/bls bin/curl bin/format bin/google bin/jira bin/jwt bin/listServices bin/logger bin/mssql bin/mysql bin/oracle bin/password bin/pdf bin/ping bin/portConcentrator bin/samba bin/transmission bin/warden bin/zoneMinder
+install: bin/acorn bin/acronym bin/addrInfo bin/aes bin/bls central.php bin/curl email.php bin/format functions.php bin/google ircBot.php bin/jira bin/jwt bin/listServices bin/logger bin/mssql bin/mysql bin/oracle bin/password bin/pdf bin/ping bin/portConcentrator bin/samba soap.php tcpdf.php bin/teradata bin/transmission bin/warden weather.php bin/zoneMinder
 	install --mode=775 bin/acorn $(prefix)/servicejunction/service/
 	install --mode=775 bin/acronym $(prefix)/servicejunction/service/
 	install --mode=775 bin/addrInfo $(prefix)/servicejunction/service/
@@ -26,7 +26,7 @@ install: bin/acorn bin/acronym bin/addrInfo bin/aes bin/bls central.php bin/curl
 	install --mode=664 ircBot.php $(prefix)/servicejunction/service/
 	install --mode=775 bin/jira $(prefix)/servicejunction/service/
 	install --mode=775 bin/jwt $(prefix)/servicejunction/service/
-	install --mode=664 listServices.php $(prefix)/servicejunction/service/
+	install --mode=775 bin/listServices $(prefix)/servicejunction/service/
 	install --mode=664 location.php $(prefix)/servicejunction/service/
 	install --mode=775 bin/logger $(prefix)/servicejunction/service/
 	install --mode=775 bin/mssql $(prefix)/servicejunction/service/
@@ -143,8 +143,12 @@ obj/jwt.o: jwt.cpp obj ../../common/Makefile
 	g++ -g -Wall -c jwt.cpp -o obj/jwt.o -I/usr/local/include -I/usr/local/ssl/include -I/data/extras/include -I../../common;
 # }}}
 # {{{ listServices
-listServices: listServices.php functions.php
-	install --mode=664 listServices.php $(prefix)/servicejunction/service/
+listServices: bin/listServices
+	install --mode=775 bin/listServices $(prefix)/servicejunction/service/
+bin/listServices: ../../common/libcommon.a obj/functions.o obj/listServices.o bin
+	g++ -o bin/listServices obj/listServices.o obj/functions.o -L/data/extras/lib -L../../common -lcommon -lb64 -lcrypto -lcurl -lexpat -lmjson -lpthread -lssl -ltar -lz
+obj/listServices.o: listServices.cpp obj ../../common/Makefile
+	g++ -g -Wall -c listServices.cpp -o obj/listServices.o -I/usr/local/ssl/include -I/data/extras/include -I../../common;
 # }}}
 # {{{ location
 location: location.php functions.php
