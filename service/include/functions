@@ -25,7 +25,7 @@ struct memoryStruct
 };
 
 void dump(const char *text, FILE *stream, unsigned char *ptr, size_t size);
-bool fetchPage(string &strUrl, const string strType, map<string, string> auth, const string strCookies, const string strPost, const string strPut, const string strProxy, string &strHeader, string &strContent, string &strError, const string strUserAgent = "", const bool bMobile = false, const bool bFailOnError = true, const bool bDebug = false, const string strCustomRequest = "");
+bool fetchPage(string &strUrl, const string strType, map<string, string> auth, const string strCookies, const string strPatch, const string strPost, const string strPut, const string strProxy, string &strHeader, string &strContent, string &strError, const string strUserAgent = "", const bool bMobile = false, const bool bFailOnError = true, const bool bDebug = false, const string strCustomRequest = "");
 void loadRequest(list<string> &request);
 void loadRequest(list<Json *> &request);
 void loadRequest(map<string, string> &requestArray, list<string> &request);

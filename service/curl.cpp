@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
         bool bFailOnError = true, bMobile = false;
         map<string, bool> display;
         map<string, string> auth;
-        string strContent, strCustomRequest, strHeader, strPost, strProxy, strPut, strType, strURL = data["URL"], strUserAgent;
+        string strContent, strCustomRequest, strHeader, strPatch, strPost, strProxy, strPut, strType, strURL = data["URL"], strUserAgent;
         if (ptJson->m.find("Auth") != ptJson->m.end())
         {
           for (auto &j : ptJson->m["Auth"]->m)
@@ -156,6 +156,24 @@ int main(int argc, char *argv[])
         {
           strProxy = data["Proxy"];
         }
+        if (ptJson->m.find("Patch") != ptJson->m.end())
+        {
+          if (strType == "json")
+          {
+            ptJson->m["Patch"]->json(strPatch);
+          }
+          else
+          {
+            for (auto j = ptJson->m["Patch"]->m.begin(); j != ptJson->m["Patch"]->m.end(); j++)
+            {
+              if (j != ptJson->m["Patch"]->m.begin())
+              {
+                strPatch += "&";
+              }
+              strPatch += manip.urlEncode(strValue, j->first) + (string)"=" + manip.urlEncode(strValue, j->second->v);
+            }
+          }
+        }
         if (ptJson->m.find("Post") != ptJson->m.end())
         {
           if (strType == "json")
@@ -196,7 +214,7 @@ int main(int argc, char *argv[])
             }
           }
         }
-        if (fetchPage(strURL, strType, auth, ssCookies.str(), strPost, strPut, strProxy, strHeader, strContent, strError, strUserAgent, bMobile, bFailOnError, bDebug, strCustomRequest))
+        if (fetchPage(strURL, strType, auth, ssCookies.str(), strPatch, strPost, strPut, strProxy, strHeader, strContent, strError, strUserAgent, bMobile, bFailOnError, bDebug, strCustomRequest))
         {
           bProcessed = true;
         }

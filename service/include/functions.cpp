@@ -40,7 +40,7 @@ void dump(const char *text, FILE *stream, unsigned char *ptr, size_t size)
 }
 // }}}
 // {{{ fetchPage()
-bool fetchPage(string &strUrl, const string strType, map<string, string> auth, const string strCookies, const string strPost, const string strPut, const string strProxy, string &strHeader, string &strContent, string &strError, const string strUserAgent, const bool bMobile, const bool bFailOnError, const bool bDebug, const string strCustomRequest)
+bool fetchPage(string &strUrl, const string strType, map<string, string> auth, const string strCookies, const string strPatch, const string strPost, const string strPut, const string strProxy, string &strHeader, string &strContent, string &strError, const string strUserAgent, const bool bMobile, const bool bFailOnError, const bool bDebug, const string strCustomRequest)
 {
   bool bHeader = false, bResult = false, bRedirect = true;
   char szError[CURL_ERROR_SIZE] = "\0";
@@ -102,7 +102,24 @@ bool fetchPage(string &strUrl, const string strType, map<string, string> auth, c
     }
   }
   curl_easy_setopt(ch, CURLOPT_FOLLOWLOCATION, true);
-  if (!strPost.empty() && strPost != "null" && strPost != "\"\"")
+  if (!strPatch.empty() && strPatch != "null" && strPatch != "\"\"")
+  {
+    if (strType == "json")
+    {
+      stringstream ssLength;
+      bHeader = true;
+      curl_easy_setopt(ch, CURLOPT_CUSTOMREQUEST, "PATCH");
+      headers = curl_slist_append(headers, "Content-Type: application/json");
+      ssLength << "Content-Length: " << strPatch.size();
+      headers = curl_slist_append(headers, ssLength.str().c_str());
+    }
+    else
+    {
+      curl_easy_setopt(ch, CURLOPT_UPLOAD, true);
+    }
+    curl_easy_setopt(ch, CURLOPT_POSTFIELDS, strPatch.c_str());
+  }
+  else if (!strPost.empty() && strPost != "null" && strPost != "\"\"")
   {
     if (strType == "json" || strType == "plain")
     {
