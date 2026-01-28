@@ -1,6 +1,6 @@
 /* -*- c++ -*- */
 ///////////////////////////////////////////
-// CURL
+// cURL
 // -------------------------------------
 // file       : curl.cpp
 // author     : Ben Kietzman
@@ -9,9 +9,9 @@
 // email      : ben@kietzman.org
 ///////////////////////////////////////////
 /*! \file curl.cpp
-* \brief CURL
+* \brief cURL
 *
-* A CURL program capable of interfacing with websites.
+* A cURL program capable of interfacing with websites.
 */
 #include <cstdio>
 #include <fstream>
@@ -220,7 +220,7 @@ int main(int argc, char *argv[])
         }
         else if (strError.empty())
         {
-          strError = "Caught an unknown CURL error.";
+          strError = "Caught an unknown cURL error.";
         }
         data["Status"] = (string)((bProcessed)?"okay":"error");
         if (!strError.empty())
