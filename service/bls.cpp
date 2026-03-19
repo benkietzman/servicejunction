@@ -109,6 +109,10 @@ int main(int argc, char *argv[])
         {
           ptGet = request.back()->m["Get"];
         }
+        if (request.back()->m.find("Patch") != request.back()->m.end())
+        {
+          ptPatch = request.back()->m["Patch"];
+        }
         if (request.back()->m.find("Post") != request.back()->m.end())
         {
           ptPost = request.back()->m["Post"];
