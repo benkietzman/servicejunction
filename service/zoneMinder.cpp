@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
         ptPost->insert("password", ptJson->m["Password"]->v);
         ptPost->insert("action", "login");
         ptPost->insert("view", "console");
-        if (junction.curl(strURL, "", NULL, NULL, ptPost, NULL, strProxy, strCookies, strHeader, strContent, strError))
+        if (junction.curl(strURL, "", NULL, NULL, NULL, ptPost, NULL, strProxy, strCookies, strHeader, strContent, strError))
         {
           bReady = true;
         }
@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
         if (ptJson->m.find("Action") != ptJson->m.end() && !ptJson->m["Action"]->v.empty())
         {
           strURL = ptJson->m["Base"]->v + (string)"/api" + ptJson->m["Action"]->v;
-          if (junction.curl(strURL, "", NULL, NULL, NULL, NULL, strProxy, strCookies, strHeader, strContent, strError))
+          if (junction.curl(strURL, "", NULL, NULL, NULL, NULL, NULL, strProxy, strCookies, strHeader, strContent, strError))
           {
             string strJson, strLine, strTrim;
             stringstream ssContent(strContent);
