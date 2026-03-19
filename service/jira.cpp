@@ -40,7 +40,7 @@ using namespace common;
 bool gbDebug = false;
 // }}}
 // {{{ prototypes
-void addCurlResult(Json *ptCurl, const string strURL, Json *ptGet, Json *ptPost, const string strCookies, const string strHeader, const string strContent);
+void addCurlResult(Json *ptCurl, const string strURL, Json *ptGet, Json *ptPatch, Json *ptPost, Json *ptPut, const string strCookies, const string strHeader, const string strContent);
 // }}}
 // {{{ main()
 int main(int argc, char *argv[])
@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
       bool bCurl = false;
       size_t unPosition;
       string strContent, strCookies, strHeader, strPage, strProxy, strSearch, strServer = "jira.atlassian.com", strURL = (string)"https://" + strServer + (string)"/rest/" + strApi + (string)"/" + strVersion + (string)"/" + request.front()->m["Resource"]->v;
-      Json *ptAuth = NULL, *ptGet = NULL, *ptPost = NULL, *ptPut = NULL;
+      Json *ptAuth = NULL, *ptGet = NULL, *ptPatch = NULL, *ptPost = NULL, *ptPut = NULL;
       if (request.front()->m.find("User") != request.front()->m.end() && !request.front()->m["User"]->v.empty() && request.front()->m.find("Password") != request.front()->m.end() && !request.front()->m["Password"]->v.empty())
       {
         label["User"] = request.front()->m["User"]->v;
@@ -110,6 +110,10 @@ int main(int argc, char *argv[])
         {
           ptGet = request.back()->m["Get"];
         }
+        if (request.back()->m.find("Patch") != request.back()->m.end())
+        {
+          ptPatch = request.back()->m["Patch"];
+        }
         if (request.back()->m.find("Post") != request.back()->m.end())
         {
           ptPost = request.back()->m["Post"];
@@ -119,14 +123,30 @@ int main(int argc, char *argv[])
           ptPut = request.back()->m["Put"];
         }
       }
-      bCurl = pJunction->curl(strURL + strPage, "json", ptAuth, ptGet, ptPost, ptPut, strProxy, strCookies, strHeader, strContent, strError, "", false, false);
+      bCurl = pJunction->curl(strURL + strPage, "json", ptAuth, ptGet, ptPatch, ptPost, ptPut, strProxy, strCookies, strHeader, strContent, strError, "", false, false);
       if (ptAuth != NULL)
       {
         delete ptAuth;
       }
       if (request.front()->m.find("curlResults") != request.front()->m.end() && request.front()->m["curlResults"]->v == "yes")
       {
-        addCurlResult((ptCurl = new Json), strURL + strPage, ptPost, ptPut, strCookies, strHeader, strContent);
+        addCurlResult((ptCurl = new Json), strURL + strPage, ptGet, ptPatch, ptPost, ptPut, strCookies, strHeader, strContent);
+      }
+      if (ptGet != NULL)
+      {
+        delete ptGet;
+      }
+      if (ptPatch != NULL)
+      {
+        delete ptPatch;
+      }
+      if (ptPost != NULL)
+      {
+        delete ptPost;
+      }
+      if (ptPut != NULL)
+      {
+        delete ptPut;
       }
       while ((unPosition = strContent.find("\n")) != string::npos || (unPosition = strContent.find("\r")) != string::npos || (unPosition = strContent.find("\\")) != string::npos)
       {
@@ -206,7 +226,7 @@ int main(int argc, char *argv[])
 }
 // }}}
 // {{{ addCurlResult()
-void addCurlResult(Json *ptCurl, const string strURL, Json *ptGet, Json *ptPost, const string strCookies, const string strHeader, const string strContent)
+void addCurlResult(Json *ptCurl, const string strURL, Json *ptGet, Json *ptPatch, Json *ptPost, Json *ptPut, const string strCookies, const string strHeader, const string strContent)
 {
   Json *ptItem = new Json;
   ptItem->insert("URL", strURL);
@@ -214,9 +234,17 @@ void addCurlResult(Json *ptCurl, const string strURL, Json *ptGet, Json *ptPost,
   {
     ptItem->m["Get"] = new Json(ptGet);
   }
+  if (ptPatch != NULL)
+  {
+    ptItem->m["Patch"] = new Json(ptPatch);
+  }
   if (ptPost != NULL)
   {
     ptItem->m["Post"] = new Json(ptPost);
+  }
+  if (ptPut != NULL)
+  {
+    ptItem->m["Put"] = new Json(ptPut);
   }
   ptItem->insert("Cookies", strCookies);
   ptItem->insert("Header", strHeader);
