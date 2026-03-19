@@ -36,11 +36,14 @@ int main(int argc, char *argv[])
   int nReturn;
   list<Json *> request;
   string strError, strPort = "5646", strServer = "localhost";
-  Json *ptJson, *ptRequest;
+  Json *ptJson, *ptRequest = NULL;
   Utility utility(strError);
 
   loadRequest(request);
-  ptRequest = request.front();
+  if (!request.empty())
+  {
+    ptRequest = request.front();
+  }
   ptJson = utility.conf();
   if (ptJson->m.find("Logger") != ptJson->m.end() && !ptJson->m["Logger"]->v.empty())
   {
@@ -76,7 +79,7 @@ int main(int argc, char *argv[])
     if (bConnected[1])
     {
       bool bConvertedTime = true;
-      if (ptRequest->m.find("Search") != ptRequest->m.end() && ptRequest->m["Search"]->m.find("Time") != ptRequest->m["Search"]->m.end())
+      if (ptRequest != NULL && ptRequest->m.find("Search") != ptRequest->m.end() && ptRequest->m["Search"]->m.find("Time") != ptRequest->m["Search"]->m.end())
       {
         for (auto &i : ptRequest->m["Search"]->m["Time"]->m)
         {
@@ -112,7 +115,10 @@ int main(int argc, char *argv[])
         char szBuffer[65536];
         size_t unPosition;
         string strBuffer[2];
-        ptRequest->json(strBuffer[1]);
+        if (ptRequest != NULL)
+        {
+          ptRequest->json(strBuffer[1]);
+        }
         strBuffer[1] += "\n";
         while (!bExit)
         {
