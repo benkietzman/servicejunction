@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
           {
             ssPost << manip.urlEncode(strValue, "kietzman.org-ServiceJunction-1.0");
           }
-          if (fetchPage(strUrl, "", auth, "", ssPost.str(), "", "", strHeader, strContent, strError))
+          if (fetchPage(strUrl, "", auth, "", "", ssPost.str(), "", "", strHeader, strContent, strError))
           {
             size_t nPosition[2] = {0, 0};
             if ((nPosition[0] = strContent.find("Auth=", 0)) != string::npos && (nPosition[1] = strContent.find("\n", nPosition[0])) != string::npos)
@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
             ssPost.str("");
             ssPost << "?sql=" << manip.urlEncode(strValue, requestArray["Query"]);
             strUrl += ssPost.str();
-            if (fetchPage(strUrl, "", auth, "", "", "", "", strHeader, strContent, strError))
+            if (fetchPage(strUrl, "", auth, "", "", "", "", "", strHeader, strContent, strError))
             {
               bProcessed = true;
             }
@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
           {
             ssPost.str("");
             ssPost << "sql=" << manip.urlEncode(strValue, requestArray["Update"]);
-            if (fetchPage(strUrl, "", auth, "", ssPost.str(), "", "", strHeader, strContent, strError))
+            if (fetchPage(strUrl, "", auth, "", "", ssPost.str(), "", "", strHeader, strContent, strError))
             {
               bProcessed = true;
             }
