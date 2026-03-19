@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
     {
       size_t unPosition;
       string strContent, strCookies, strHeader, strPage, strProxy, strSearch, strServer = "api.bls.gov", strURL = (string)"https://" + strServer + (string)"/" + strApi + (string)"/" + strVersion + (string)"/" + request.front()->m["Resource"]->v;
-      Json *ptAuth = NULL, *ptGet = NULL, *ptPost = NULL, *ptPut = NULL;
+      Json *ptAuth = NULL, *ptGet = NULL, *ptPatch = NULL, *ptPost = NULL, *ptPut = NULL;
       if (request.front()->m.find("User") != request.front()->m.end() && !request.front()->m["User"]->v.empty() && request.front()->m.find("Password") != request.front()->m.end() && !request.front()->m["Password"]->v.empty())
       {
         label["User"] = request.front()->m["User"]->v;
@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
           ptPut = request.back()->m["Put"];
         }
       }
-      pJunction->curl(strURL + strPage, "json", ptAuth, ptGet, ptPost, ptPut, strProxy, strCookies, strHeader, strContent, strError, "", false, false);
+      pJunction->curl(strURL + strPage, "json", ptAuth, ptGet, ptPatch, ptPost, ptPut, strProxy, strCookies, strHeader, strContent, strError, "", false, false);
       if (ptAuth != NULL)
       {
         delete ptAuth;
