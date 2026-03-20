@@ -273,12 +273,14 @@ int main(int argc, char *argv[])
           bConcentrator = true;
           bSecure = true;
           prctl(PR_SET_NAME, "junction_con", 0, 0, 0);
+          strncpy(argv[0], "junction_con", strlen(argv[0]));
         }
         else if (nFork == 0)
         {
           bChild = true;
           bSecure = true;
           prctl(PR_SET_NAME, "junction_sec", 0, 0, 0);
+          strncpy(argv[0], "junction_sec", strlen(argv[0]));
         }
         else
         {
@@ -290,6 +292,7 @@ int main(int argc, char *argv[])
         bChild = true;
         bStandard = true;
         prctl(PR_SET_NAME, "junction_std", 0, 0, 0);
+        strncpy(argv[0], "junction_std", strlen(argv[0]));
       }
       if (bSecure)
       {
