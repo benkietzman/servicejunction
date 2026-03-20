@@ -306,7 +306,7 @@ int main(int argc, char *argv[])
   }
   else
   {
-    ptJson = new Json(request.front());
+    ptJson = new Json(((!request.empty())?request.front():""));
     ptJson->insert("Status", "error");
     if (!strError.empty())
     {
@@ -314,10 +314,13 @@ int main(int argc, char *argv[])
     }
     cout << ptJson << endl;
     delete ptJson;
-    request.pop_front();
-    for (auto &i : request)
+    if (!request.empty())
     {
-      cout << i << endl;
+      request.pop_front();
+      for (auto &i : request)
+      {
+        cout << i << endl;
+      }
     }
   }
   request.clear();
