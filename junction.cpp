@@ -351,13 +351,13 @@ int main(int argc, char *argv[])
               int fdData;
               string strSystem;
               socklen_t clilen;
-              sockaddr_in cli_addr;
+              sockaddr_in6 cli_addr;
               time_t CWarden[2] = {0, 0};
               Json *ptWarden = new Json;
               Warden *pWarden = ((!gstrWarden.empty())?new Warden(gstrApplication, gstrWarden, strError):NULL);
               gpCentral->log((string)"Listening to the " + (string)((bConcentrator)?"concentrator":((bStandard)?"standard":"secure")) + (string)" socket.");
               clilen = sizeof(cli_addr);
-              while (!gbShutdown && (fdData = accept(fdSocket, (struct sockaddr *)&cli_addr, &clilen)) >= 0)
+              while (!gbShutdown && (fdData = accept(fdSocket, (sockaddr *)&cli_addr, &clilen)) >= 0)
               {
                 // {{{ shutdown
                 if (gpCentral->file()->fileExist(gstrData + "/.shutdown"))
