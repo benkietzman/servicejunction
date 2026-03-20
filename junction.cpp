@@ -474,6 +474,8 @@ int main(int argc, char *argv[])
                   SSL *ssl = NULL;
                   sockaddr_storage addr;
                   socklen_t len = sizeof(addr);
+                  prctl(PR_SET_NAME, ((bConcentrator)?"junction_con_c":((bStandard)?"junction_std_c":"junction_sec_c")), 0, 0, 0);
+                  strncpy(argv[0], ((bConcentrator)?"junction_con_c":((bStandard)?"junction_std_c":"junction_sec_c")), strlen(argv[0]));
                   close(fdSocket);
                   fdSocket = -1;
                   getpeername(fdData, (sockaddr*)&addr, &len);
