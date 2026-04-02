@@ -30,21 +30,11 @@ int main(int argc, char *argv[])
   map<string, string> requestArray;
   list<map<string, string> > responseArray;
   list<string> request;
-  string strDriver, strError, strLine;
+  string strError, strLine;
   StringManip manip;
 
-  for (int i = 1; i < argc; i++)
-  {
-    string strArg = argv[i];
-    if (strArg.size() > 9 && strArg.substr(0, 9) == "--driver=")
-    {
-      strDriver = strArg.substr(9, strArg.size() - 9);
-      manip.purgeChar(strDriver, strDriver, "'");
-      manip.purgeChar(strDriver, strDriver, "\"");
-    }
-  }
   loadRequest(requestArray, request);
-  if (!strDriver.empty() && requestArray.find("Schema") != requestArray.end() && !requestArray["Schema"].empty() && requestArray.find("Password") != requestArray.end() && !requestArray["Password"].empty() && requestArray.find("tnsName") != requestArray.end() && !requestArray["tnsName"].empty() && ((requestArray.find("Query") != requestArray.end() && !requestArray["Query"].empty()) || (requestArray.find("Update") != requestArray.end() && !requestArray["Update"].empty())))
+  if (requestArray.find("Schema") != requestArray.end() && !requestArray["Schema"].empty() && requestArray.find("Password") != requestArray.end() && !requestArray["Password"].empty() && requestArray.find("tnsName") != requestArray.end() && !requestArray["tnsName"].empty() && ((requestArray.find("Query") != requestArray.end() && !requestArray["Query"].empty()) || (requestArray.find("Update") != requestArray.end() && !requestArray["Update"].empty())))
   {
     SQLHENV env;
     if (SQL_SUCCEEDED(SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &env)))
@@ -154,10 +144,6 @@ int main(int argc, char *argv[])
       strError = ssError.str();
     }
     SQLFreeHandle(SQL_HANDLE_ENV, env);
-  }
-  else if (strDriver.empty())
-  {
-    strError = "Please configure the driver for the service.";
   }
   else if (requestArray.find("Schema") == requestArray.end() || requestArray["Schema"].empty())
   {
