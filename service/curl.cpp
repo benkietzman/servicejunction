@@ -121,7 +121,7 @@ int main(int argc, char *argv[])
         }
         if (data.find("CustomRequest") != data.end() && !data["CustomRequest"].empty())
         {
-          strCustomRequest = data["CustomRequest"];
+          manip.toUpper(strCustomRequest, data["CustomRequest"]);
         }
         if (data.find("Type") != data.end() && !data["Type"].empty())
         {

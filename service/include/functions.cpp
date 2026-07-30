@@ -300,6 +300,19 @@ bool fetchPage(string &strUrl, const string strType, map<string, string> auth, c
     else
     {
       strError = szError;
+cout << "ERROR:  " << strError << endl;
+      if (chunk.memory)
+      {
+        size_t nPosition;
+        stringstream ssData;
+        ssData.str(chunk.memory);
+cout << "DATA:  " << ssData.str() << endl;
+        if ((nPosition = ssData.str().find("\r\n\r\n")) != string::npos)
+        {
+          strContent = ssData.str().substr(nPosition + 4, ssData.str().size() - (nPosition + 4));
+cout << "CONTENT:  " << strContent << endl;
+        }
+      }
     }
     if (chunk.memory)
     {
