@@ -32,7 +32,6 @@
 #include <netinet/in.h>
 #include <openssl/err.h>
 #include <openssl/ssl.h>
-#include <pcrecpp.h>
 #include <poll.h>
 #include <sstream>
 #include <string>
