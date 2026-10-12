@@ -132,22 +132,6 @@ int main(int argc, char *argv[])
       {
         addCurlResult((ptCurl = new Json), strURL + strPage, ptGet, ptPatch, ptPost, ptPut, strCookies, strHeader, strContent);
       }
-      if (ptGet != NULL)
-      {
-        delete ptGet;
-      }
-      if (ptPatch != NULL)
-      {
-        delete ptPatch;
-      }
-      if (ptPost != NULL)
-      {
-        delete ptPost;
-      }
-      if (ptPut != NULL)
-      {
-        delete ptPut;
-      }
       while ((unPosition = strContent.find("\n")) != string::npos || (unPosition = strContent.find("\r")) != string::npos || (unPosition = strContent.find("\\")) != string::npos)
       {
         strContent.erase(unPosition, 1);
